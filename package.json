@@ -1,0 +1,10 @@
+{
+  "name": "livecommerce44",
+  "private": true,
+  "description": "Inscrição Live Commerce 44",
+  "dependencies": {
+    "@vercel/blob": "^2.8.0",
+    "busboy": "^1.6.0",
+    "qrcode": "1.5.4"
+  }
+}

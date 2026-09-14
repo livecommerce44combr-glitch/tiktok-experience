@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-79NQ1X2R66"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-79NQ1X2R66');
+  </script>
+  <!-- Meta Pixel Code -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1490267996261328');
+    fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1490267996261328&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
+  <title>Inscrição · Live Commerce 44</title>
+  <meta name="description" content="Live Commerce 44 — Da 44 para o Brasil. Evento presencial em 11 de outubro de 2026, no Shopping Gallo, Goiânia. 9h às 16h." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f7f5f1;
+      --white: #ffffff;
+      --ink: #111111;
+      --muted: #6b6b6b;
+      --line: #ece8e1;
+      --pink: #e1067a;
+      --pink-hot: #ff1f8f;
+      --cyan: #0bb8c9;
+      --countdown: #1a1a1a;
+      --radius: 16px;
+      --shadow: 0 8px 30px rgba(17, 17, 17, .06);
+      --body: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--body);
+      line-height: 1.55;
+    }
+    body.modal-open { overflow: hidden; }
+    img { display: block; max-width: 100%; height: auto; }
+    a { color: inherit; text-decoration: none; }
+    button, select, input { font: inherit; color: inherit; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 40;
+      background: var(--white);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar__inner {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand strong { display: block; font-size: .95rem; letter-spacing: .04em; }
+    .brand small { display: block; color: var(--pink); font-size: .62rem; font-weight: 800; letter-spacing: .16em; }
+    .topbar a.ghost {
+      color: var(--muted);
+      font-size: .85rem;
+      font-weight: 600;
+    }
+
+    .page {
+      width: min(760px, calc(100% - 28px));
+      margin: 28px auto 80px;
+    }
+
+    .poster {
+      overflow: hidden;
+      border-radius: 22px;
+      background: #111;
+      box-shadow: var(--shadow);
+    }
+    .poster img { width: 100%; height: auto; display: block; }
+    .poster-fallback {
+      min-height: 280px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      text-align: center;
+      padding: 32px;
+      background: linear-gradient(160deg, #111, #3a0a28);
+    }
+
+    .sheet {
+      margin-top: 14px;
+      padding: 28px 24px 36px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 999px;
+      background: #111; color: #fff;
+      font-size: .68rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    }
+    .pill--hot { background: linear-gradient(90deg, #ff7a18, var(--pink-hot)); }
+    .pill--soft { background: #f1eee8; color: #333; }
+
+    .kicker {
+      margin: 18px 0 6px;
+      color: var(--pink);
+      font-size: .72rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 22px;
+      font-size: clamp(2rem, 7vw, 3.1rem);
+      line-height: .95;
+      letter-spacing: -.03em;
+      text-transform: uppercase;
+    }
+
+    .place {
+      overflow: hidden;
+      margin: 0 0 16px;
+      border-radius: 18px;
+      background: #0b0b12;
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+    .place__visual {
+      display: block;
+      line-height: 0;
+    }
+    .place__visual img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .place__copy {
+      padding: 22px 20px 24px;
+      text-align: center;
+    }
+    .place__eyebrow {
+      margin: 0 0 10px;
+      color: rgba(255,255,255,.55);
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    .place__copy h2 {
+      margin: 0;
+      font-size: clamp(1.7rem, 7vw, 2.35rem);
+      line-height: .95;
+      letter-spacing: -.03em;
+      text-transform: uppercase;
+    }
+    .place__pin {
+      margin: 10px 0 8px;
+      color: var(--pink-hot);
+      font-size: 1rem;
+      font-weight: 800;
+    }
+    .place__addr {
+      margin: 0;
+      color: rgba(255,255,255,.72);
+      font-size: .88rem;
+      line-height: 1.45;
+    }
+    .place__cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 16px;
+      min-height: 42px;
+      padding: 0 18px;
+      border-radius: 999px;
+      background: var(--pink);
+      color: #fff;
+      font-size: .82rem;
+      font-weight: 800;
+    }
+
+    .countdown {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      margin: 8px 0 22px; padding: 16px 18px;
+      border-radius: 16px;
+      background: #0b0b12;
+      color: #fff;
+      border: 1px solid rgba(11, 184, 201, .35);
+    }
+    .countdown span.label {
+      color: var(--cyan);
+      font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+    }
+    .countdown__units { display: flex; gap: 8px; }
+    .countdown__units div {
+      min-width: 58px; padding: 8px 6px;
+      border-radius: 10px;
+      background: #111820;
+      border: 1px solid rgba(255, 31, 143, .45);
+      text-align: center;
+    }
+    .countdown__units b {
+      display: block;
+      font-size: 1.7rem;
+      line-height: 1;
+      color: #7ef0ff;
+      text-shadow: 0 0 12px rgba(11, 184, 201, .55);
+    }
+    .countdown__units small {
+      display: block; margin-top: 4px;
+      color: #ff7ab8;
+      font-size: .55rem; font-weight: 800; letter-spacing: .08em;
+    }
+
+    .about { color: #3a3a3a; font-size: .95rem; }
+    .about p { margin: 0 0 12px; }
+    .mini-facts { margin: 16px 0 8px; color: #555; font-size: .9rem; }
+    .mini-facts div { display: flex; gap: 8px; margin: 6px 0; }
+    .toggle-more {
+      margin: 8px 0 22px; padding: 0; border: 0; background: none;
+      color: var(--pink); font-weight: 700; cursor: pointer;
+    }
+
+    .extra[hidden] { display: none !important; }
+    .block { margin: 28px 0; padding-top: 8px; border-top: 1px solid var(--line); }
+    .block h2 { margin: 16px 0 12px; font-size: 1.15rem; }
+    .who, .program, .tickets { display: grid; gap: 10px; }
+    .who article, .program article, .tickets article {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #faf9f7;
+    }
+    .who span, .program span { color: var(--pink); font-size: .72rem; font-weight: 800; }
+    .who h3, .program h3, .tickets h3 { margin: 6px 0 6px; font-size: .95rem; }
+    .who p, .program p, .tickets p { margin: 0; color: var(--muted); font-size: .82rem; }
+    .ticket-btns { display: grid; gap: 8px; margin-top: 12px; }
+    .ticket-btns button {
+      display: flex; justify-content: space-between; align-items: center;
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer;
+    }
+    .faq details { border-bottom: 1px solid var(--line); }
+    .faq summary {
+      cursor: pointer; padding: 14px 0;
+      font-weight: 700; list-style: none;
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq p { margin: 0 0 14px; color: var(--muted); font-size: .88rem; }
+
+    .form { display: grid; gap: 14px; }
+    .form label { display: grid; gap: 6px; }
+    .form label > span { font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .req { color: var(--pink); }
+    .form input, .form select {
+      width: 100%; height: 52px; padding: 0 14px;
+      border: 1px solid #e4dfd6; border-radius: 12px; background: #fff; outline: 0;
+    }
+    .form input:focus, .form select:focus { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(225,6,122,.12); }
+    .form input.is-invalid { border-color: #d11; }
+    .field-error { min-height: 1em; color: #c00; font-size: .72rem; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 52px; padding: 0 18px; border: 0; border-radius: 12px;
+      background: #1a1a1a; color: #fff; font-weight: 700; cursor: pointer;
+    }
+    .btn--full { width: 100%; }
+    .btn--pink { background: linear-gradient(110deg, var(--pink-hot), var(--pink)); }
+    .help {
+      margin-top: 22px; text-align: center;
+      color: var(--muted); font-size: .85rem;
+    }
+    .help a { color: var(--pink); font-weight: 700; }
+
+    .pix-section {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+    .pix-section h2 { margin: 8px 0 8px; font-size: 1.35rem; }
+    .pix-section .step { color: var(--cyan); font-size: .68rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .pix-value {
+      display: flex; justify-content: space-between; align-items: end;
+      margin: 16px 0; padding: 12px 14px;
+      border: 1px solid #d8f4f7; border-radius: 12px; background: #f3fcfd;
+    }
+    .pix-code {
+      width: min(280px, 86%);
+      margin: 16px auto 0;
+      padding: 18px;
+      border: 2px solid var(--cyan);
+      border-radius: 12px;
+      background: #fff;
+      overflow: visible;
+    }
+    .pix-code canvas, .pix-code img {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #fff;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .pix-copy { display: grid; gap: 8px; margin-top: 14px; }
+    .pix-copy > span, .receipt-box > span { font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .pix-copy code {
+      overflow-wrap: anywhere;
+      font-size: .8rem;
+      background: #faf9f7;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      user-select: all;
+      -webkit-user-select: all;
+      white-space: pre-wrap;
+    }
+    .pix-email { font-size: .95rem; word-break: break-all; }
+    .pix-copy button, .receipt-box button {
+      min-height: 42px; border: 0; border-radius: 10px;
+      background: var(--cyan); color: #042; font-weight: 800; cursor: pointer;
+    }
+    .pix-copy button.is-copied { background: #7be3a8; }
+    .receipt-box {
+      display: grid; gap: 8px; margin-top: 18px;
+    }
+    .receipt-box input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+    .receipt-box label {
+      display: grid; place-items: center; min-height: 86px; padding: 14px;
+      border: 1px dashed #d4cfc6; border-radius: 12px; background: #faf9f7; cursor: pointer; text-align: center;
+    }
+    .receipt-box label b { color: var(--pink); }
+    .receipt-box label small { color: var(--muted); font-size: .75rem; }
+    .pix-actions { display: grid; gap: 10px; margin-top: 16px; }
+    .alert {
+      margin-top: 14px; padding: 14px 16px; border-radius: 10px;
+      border: 2px solid var(--pink);
+      background: #fff0f6;
+      color: var(--pink);
+      font-size: .92rem;
+      font-weight: 800;
+      line-height: 1.4;
+      text-align: center;
+      animation: alerta-pisca 1.1s ease-in-out infinite;
+    }
+    @keyframes alerta-pisca {
+      0%, 100% { opacity: 1; background: #fff0f6; color: var(--pink); }
+      50% { opacity: .35; background: #ffd6ea; color: var(--pink-hot); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .alert { animation: none; }
+    }
+    .resumo { margin: 12px 0 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; font-size: .85rem; color: var(--muted); }
+    .resumo b { color: var(--ink); }
+    .card-opt { margin-top: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+    .card-opt small { color: var(--pink); font-size: .68rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .btn--ghost {
+      width: 100%; margin-top: 8px; min-height: 42px;
+      border: 1px solid #f3b3d2; border-radius: 10px; background: #fff5f9; color: var(--pink); font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    @media (max-width: 720px) {
+      .place { border-radius: 14px; }
+      .place__copy { padding: 18px 16px 22px; }
+      .mini-facts { display: none; }
+      .countdown { flex-direction: column; align-items: stretch; gap: 12px; }
+      .countdown__units { width: 100%; justify-content: space-between; }
+      .countdown__units div { min-width: 0; flex: 1; }
+      .sheet { padding: 22px 16px 28px; }
+      .page { width: min(760px, calc(100% - 20px)); margin: 16px auto 64px; }
+      h1 { font-size: 1.85rem; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    REVISAR ANTES DE PUBLICAR
+    1) WHATSAPP_NUMERO no script abaixo
+    2) Imagem do hero: banner-live-commerce-44.jpg
+    Chave e valor do Pix só saem do servidor.
+  -->
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="#topo">
+        <span>
+          <strong>LIVE COMMERCE 44</strong>
+          <small>DA 44 PARA O BRASIL</small>
+        </span>
+      </a>
+      <a class="ghost" href="https://wa.me/5562995360202" target="_blank" rel="noopener noreferrer">Dúvidas no WhatsApp</a>
+    </div>
+  </header>
+
+  <main class="page" id="topo">
+    <div class="poster">
+      <img
+        src="banner-live-commerce-44.jpg"
+        alt="Live Commerce 44 — palestrantes confirmados, 11 de outubro, 9h às 16h, Shopping Gallo"
+      />
+    </div>
+
+    <section class="sheet">
+      <div class="pills">
+        <span class="pill">Presencial</span>
+        <span class="pill pill--hot">Vagas limitadas</span>
+        <span class="pill pill--soft">1º lote até 12 de setembro</span>
+      </div>
+
+      <p class="kicker">Inscrição</p>
+      <h1>Live Commerce 44</h1>
+
+      <div class="place">
+        <a class="place__visual" href="https://maps.app.goo.gl/vjEqXwfVGzBBo5rq9" target="_blank" rel="noopener noreferrer">
+          <img src="banner-local-shopping-gallo.jpg" alt="Shopping Gallo — local do Live Commerce 44" />
+        </a>
+        <div class="place__copy">
+          <p class="place__eyebrow">Um espaço novo e maior</p>
+          <h2>Shopping Gallo</h2>
+          <p class="place__pin">Piso 2 · Praça de Alimentação</p>
+          <p class="place__addr">R. 67-A, s/n · Setor Central · Goiânia/GO · 74055-045</p>
+          <a class="place__cta" href="https://maps.app.goo.gl/vjEqXwfVGzBBo5rq9" target="_blank" rel="noopener noreferrer">Ver no mapa</a>
+        </div>
+      </div>
+
+      <div class="about">
+        <p>Na China, transmissões ao vivo deixaram de ser apenas entretenimento e se transformaram em um dos canais de venda mais poderosos do varejo. No Brasil, a oportunidade já começou. O Live Commerce 44 conecta quem vende, quem cria e quem influencia para mostrar como levar a força do comércio goiano muito além da porta da loja. Do físico para o digital. Do estoque para a tela. Da 44 para o Brasil.</p>
+      </div>
+
+      <div class="mini-facts">
+        <div>📅 11 de outubro</div>
+        <div>⏰ 9h às 16h</div>
+        <div>📍 Shopping Gallo — Piso 2, Praça de Alimentação<br />Goiânia/GO</div>
+      </div>
+
+      <button class="toggle-more" type="button" id="btn-mais" aria-expanded="false">Ver mais</button>
+
+      <div class="extra" id="extra" hidden>
+        <div class="block">
+          <h2>Para quem é o evento</h2>
+          <div class="who">
+            <article><span>01</span><h3>Lojistas e empresários</h3><p>Para transformar a loja física em uma operação de vendas que também acontece no digital.</p></article>
+            <article><span>02</span><h3>Sellers e vendedores</h3><p>Para dominar apresentação, oferta e conversão diante da câmera.</p></article>
+            <article><span>03</span><h3>Criadores e influenciadores</h3><p>Para monetizar audiência com afiliação, comissão e parcerias comerciais.</p></article>
+            <article><span>04</span><h3>Quem quer começar</h3><p>Para entender equipamentos, estrutura e os primeiros passos sem complicação.</p></article>
+          </div>
+        </div>
+
+        <div class="block">
+          <h2>O que você vai aprender</h2>
+          <div class="program">
+            <article><span>01</span><h3>TikTok Shop na prática</h3><p>Entenda a plataforma, sua dinâmica e como aproveitar o novo comportamento de compra.</p></article>
+            <article><span>02</span><h3>Como ser Live Seller</h3><p>Os primeiros passos para apresentar produtos, conduzir ofertas e vender ao vivo.</p></article>
+            <article><span>03</span><h3>Sua loja no digital</h3><p>Leve catálogo, estoque e experiência de compra para clientes de qualquer lugar.</p></article>
+            <article><span>04</span><h3>Estratégias de live</h3><p>Roteiro, ritmo, demonstração, oferta e chamadas que estimulam a decisão.</p></article>
+            <article><span>05</span><h3>Afiliação e comissão</h3><p>Novas possibilidades de receita para marcas, influenciadores e vendedores.</p></article>
+            <article><span>06</span><h3>Físico + digital</h3><p>Integre balcão, conteúdo e Live Commerce em uma única jornada de venda.</p></article>
+            <article><span>07</span><h3>Estrutura profissional</h3><p>Câmeras, luz, áudio, cenários e espaços que elevam a qualidade da transmissão.</p></article>
+            <article><span>08</span><h3>Networking estratégico</h3><p>Conecte-se com lojistas, sellers, criadores, marcas e parceiros comerciais.</p></article>
+          </div>
+        </div>
+
+        <div class="block">
+          <h2>Ingressos</h2>
+          <div class="tickets">
+            <article>
+              <h3>Basic</h3>
+              <p>Todo o conteúdo do evento para aprender, conectar e começar a vender ao vivo.</p>
+              <div class="ticket-btns">
+                <button type="button" data-ticket="basic-individual"><span>Individual</span><strong>R$ 97</strong></button>
+                <button type="button" data-ticket="basic-duplo"><span>Duplo 🔥</span><strong>R$ 147</strong></button>
+              </div>
+            </article>
+            <article>
+              <h3>Premium</h3>
+              <p>O Basic dá acesso completo ao evento. O Premium acrescenta acesso especial, área VIP, espaço reservado e mesa de frutas e tira-gostos.</p>
+              <div class="ticket-btns">
+                <button type="button" data-ticket="premium-individual"><span>Individual</span><strong>R$ 297</strong></button>
+                <button type="button" data-ticket="premium-duplo"><span>Duplo</span><strong>R$ 397</strong></button>
+              </div>
+            </article>
+            <article>
+              <h3>Cota Patrocinador</h3>
+              <p>Participação de até 5 pessoas com ingressos Premium, mentoria exclusiva de 2 horas, diagnóstico estratégico e 30 dias de suporte com a equipe.</p>
+              <div class="ticket-btns">
+                <button type="button" data-ticket="patrocinador"><span>Até 5 pessoas</span><strong>R$ 597</strong></button>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="block faq">
+          <h2>Perguntas frequentes</h2>
+          <details open>
+            <summary>Para quem é o Live Commerce 44?</summary>
+            <p>Para lojistas, empresários, vendedores, afiliados, influenciadores, criadores de conteúdo e profissionais interessados em transformar o digital em um canal de vendas.</p>
+          </details>
+          <details>
+            <summary>Preciso já vender no TikTok?</summary>
+            <p>Não. O evento foi pensado tanto para quem está começando quanto para quem já produz conteúdo ou vende e quer estruturar melhor sua operação.</p>
+          </details>
+          <details>
+            <summary>O evento é presencial?</summary>
+            <p>Sim. O encontro acontece no Shopping Gallo, Piso 2, na Praça de Alimentação, em Goiânia, das 9h às 16h.</p>
+          </details>
+          <details>
+            <summary>Qual é a diferença entre Basic e Premium?</summary>
+            <p>O Basic dá acesso completo ao evento. O Premium acrescenta acesso especial, área VIP, espaço reservado e mesa de frutas e tira-gostos.</p>
+          </details>
+          <details>
+            <summary>O que inclui a Cota Patrocinador?</summary>
+            <p>Participação de até 5 pessoas com ingressos Premium, mentoria exclusiva de 2 horas, diagnóstico estratégico e 30 dias de suporte com a equipe.</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="countdown" aria-live="polite">
+        <span class="label">⏳ Faltam para o evento</span>
+        <div class="countdown__units" id="countdown">
+          <div><b data-unit="days">00</b><small>dias</small></div>
+          <div><b data-unit="hours">00</b><small>horas</small></div>
+          <div><b data-unit="mins">00</b><small>min</small></div>
+          <div><b data-unit="secs">00</b><small>seg</small></div>
+        </div>
+      </div>
+
+      <form class="form" id="form-inscricao" novalidate>
+        <label>
+          <span>Nome completo</span>
+          <input type="text" name="nome" autocomplete="name" required placeholder="Seu nome" />
+          <small class="field-error" data-error-for="nome"></small>
+        </label>
+        <label>
+          <span>WhatsApp <i class="req">*</i></span>
+          <input type="tel" name="whatsapp" inputmode="numeric" autocomplete="tel" required placeholder="(11) 99999-9999" />
+          <small class="field-error" data-error-for="whatsapp"></small>
+        </label>
+        <label>
+          <span>Quem indicou você</span>
+          <select name="indicacao">
+            <option value="Ninguém / não informado" selected>Ninguém / não informado</option>
+          </select>
+        </label>
+        <label>
+          <span>Modalidade de ingresso</span>
+          <select name="modalidade" id="select-modalidade-form" required></select>
+        </label>
+      </form>
+
+      <section class="pix-section" id="pix">
+        <span class="step">Pagamento via Pix</span>
+        <h2>Faça o Pix e envie o comprovante</h2>
+        <p>O QR Code e o Pix copia e cola já saem com o valor do ingresso escolhido.</p>
+        <div class="pix-value"><span>Valor do Pix</span><strong id="pix-valor">R$ 97,00</strong></div>
+        <div class="pix-value"><span>Chave Pix (e-mail)</span><strong class="pix-email" id="pix-email">nutratechdigital@gmail.com</strong></div>
+        <div class="resumo" id="resumo-inscricao"></div>
+        <div class="pix-code" aria-label="QR Code Pix">
+          <img id="qr-img" alt="QR Code Pix" width="280" height="280" />
+        </div>
+        <div class="pix-copy">
+          <span>Pix copia e cola (com valor)</span>
+          <code id="pix-chave"></code>
+          <button type="button" id="btn-copiar-pix">Copiar Pix</button>
+          <small id="pix-copiado"></small>
+        </div>
+        <div class="receipt-box">
+          <span>Comprovante</span>
+          <input type="file" id="comprovante" accept="image/*,.pdf,application/pdf" />
+          <label for="comprovante" id="label-comprovante">
+            <b>Anexar comprovante</b>
+            <small>JPG, PNG, WEBP ou PDF</small>
+          </label>
+        </div>
+        <div class="alert" role="status">Depois de pagar, anexe o comprovante e chame no WhatsApp para confirmar a inscrição.</div>
+        <div class="pix-actions">
+          <a class="btn btn--pink btn--full" id="btn-whatsapp-pago" target="_blank" rel="noopener noreferrer">Chamar no WhatsApp</a>
+        </div>
+        <div class="card-opt">
+          <small>Prefere pagar no cartão? Solicite seu link de pagamento</small>
+          <a class="btn--ghost" id="btn-whatsapp-cartao" target="_blank" rel="noopener noreferrer">Pagar com cartão pelo WhatsApp</a>
+        </div>
+      </section>
+
+      <p class="help">Fale com a equipe no WhatsApp: <a href="https://wa.me/5562995360202" target="_blank" rel="noopener noreferrer">(62) 99536-0202</a></p>
+    </section>
+  </main>
+
+  <script src="qrcode-generator.js"></script>
+  <script src="qr-local.js"></script>
+  <script>
+    /* ============================================================
+     * REVISAR ANTES DE PUBLICAR
+     * ============================================================ */
+    const WHATSAPP_NUMERO = "5562995360202"; // WhatsApp oficial do Live Commerce 44
+    /* Imagem do hero: banner-live-commerce-44.jpg nesta pasta */
+
+    let pixPayloadAtual = "";
+    let pixTokenAtual = "";
+    let pixTravado = null;
+    const EVENTO_INICIO = new Date("2026-10-11T09:00:00-03:00");
+    const MODALIDADES = [];
+
+    const form = document.getElementById("form-inscricao");
+    const selectForm = document.getElementById("select-modalidade-form");
+    const pixValor = document.getElementById("pix-valor");
+    const pixEmail = document.getElementById("pix-email");
+    const pixChave = document.getElementById("pix-chave");
+    const resumo = document.getElementById("resumo-inscricao");
+    const btnPago = document.getElementById("btn-whatsapp-pago");
+    const btnCartao = document.getElementById("btn-whatsapp-cartao");
+    const qrImg = document.getElementById("qr-img");
+    const comprovante = document.getElementById("comprovante");
+    const labelComprovante = document.getElementById("label-comprovante");
+
+    function preencherSelects() {
+      selectForm.innerHTML = MODALIDADES.map((m) => `<option value="${m.id}">${m.label}</option>`).join("");
+    }
+    function modalidadeAtual() {
+      return MODALIDADES.find((m) => m.id === selectForm.value) || MODALIDADES[0];
+    }
+    function dadosFormulario() {
+      const data = new FormData(form);
+      return {
+        nome: String(data.get("nome") || "").trim(),
+        whatsapp: String(data.get("whatsapp") || "").trim(),
+        indicacao: String(data.get("indicacao") || "Ninguém / não informado")
+      };
+    }
+    function apenasDigitos(valor) { return valor.replace(/\D/g, ""); }
+    function pixLimpo(texto) {
+      return String(texto || "").replace(/[\n\r\t]/g, "").trim();
+    }
+    async function copiarPix(texto) {
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(texto);
+          return true;
+        } catch (_) {}
+      }
+      const campo = document.createElement("textarea");
+      campo.value = texto;
+      campo.setAttribute("readonly", "");
+      campo.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0";
+      document.body.appendChild(campo);
+      campo.focus();
+      campo.select();
+      campo.setSelectionRange(0, texto.length);
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (_) {}
+      document.body.removeChild(campo);
+      return ok;
+    }
+    function mascaraWhatsApp(valor) {
+      const d = apenasDigitos(valor).slice(0, 11);
+      if (d.length <= 2) return d.length ? `(${d}` : "";
+      if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+      return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+    }
+    function validarFormulario() {
+      const { nome, whatsapp } = dadosFormulario();
+      const erros = { nome: "", whatsapp: "" };
+      if (nome.length < 3) erros.nome = "Informe seu nome completo.";
+      const digits = apenasDigitos(whatsapp);
+      if (digits.length < 10 || digits.length > 11) erros.whatsapp = "Informe o WhatsApp com DDD.";
+      form.querySelector('[name="nome"]').classList.toggle("is-invalid", Boolean(erros.nome));
+      form.querySelector('[name="whatsapp"]').classList.toggle("is-invalid", Boolean(erros.whatsapp));
+      form.querySelector('[data-error-for="nome"]').textContent = erros.nome;
+      form.querySelector('[data-error-for="whatsapp"]').textContent = erros.whatsapp;
+      return !erros.nome && !erros.whatsapp;
+    }
+    function valorDoIngresso(m) {
+      return m.valor.replace(/[^\d,]/g, "").replace(",", ".");
+    }
+    function mensagemWhatsApp() {
+      const m = pixTravado || modalidadeAtual();
+      const d = dadosFormulario();
+      const arquivo = comprovante.files[0];
+      return [
+        "Olá! Acabei de fazer minha inscrição no Live Commerce 44 e realizei o pagamento via Pix. Segue meu comprovante:",
+        "",
+        `Nome: ${d.nome || "—"}`,
+        `WhatsApp: ${d.whatsapp || "—"}`,
+        `Modalidade: ${m.nome}`,
+        `Valor: ${m.valor}`,
+        arquivo ? `Comprovante anexado nesta página: ${arquivo.name}` : "Vou enviar o comprovante nesta conversa."
+      ].join("\n");
+    }
+    function salvarInscricao(origem) {
+      const m = modalidadeAtual();
+      const d = dadosFormulario();
+      if (!m || !pixTokenAtual || !pixTravado || pixTravado.id !== m.id) {
+        return Promise.resolve(null);
+      }
+      const body = new FormData();
+      body.append("nome", d.nome);
+      body.append("whatsapp", d.whatsapp);
+      body.append("indicacao", d.indicacao);
+      body.append("modalidade_id", m.id);
+      body.append("pix_token", pixTokenAtual);
+      body.append("origem", origem);
+      const arquivo = comprovante.files[0];
+      if (arquivo) body.append("comprovante", arquivo, arquivo.name);
+      return fetch("/api/inscricoes", { method: "POST", body, credentials: "same-origin", cache: "no-store" }).catch(() => null);
+    }
+    async function atualizarPix() {
+      const m = modalidadeAtual();
+      const d = dadosFormulario();
+      pixValor.textContent = m ? m.valor : "—";
+      pixChave.textContent = "Carregando Pix seguro…";
+      pixPayloadAtual = "";
+      pixTokenAtual = "";
+      pixTravado = null;
+      if (!m) return;
+      try {
+        const res = await fetch("/api/pix?modalidade=" + encodeURIComponent(m.id), { cache: "no-store", credentials: "same-origin" });
+        const dados = await res.json();
+        if (!res.ok || !dados.ok || !dados.payload || !dados.token) {
+          pixChave.textContent = "Não foi possível gerar o Pix. Recarregue a página.";
+          return;
+        }
+        if (dados.modalidade_id !== m.id) {
+          pixChave.textContent = "Rota do Pix rejeitada. Recarregue a página.";
+          return;
+        }
+        const esperado = valorDoIngresso({ valor: dados.valor });
+        const payload = pixLimpo(dados.payload);
+        if (
+          dados.valor !== m.valor ||
+          dados.chave !== "nutratechdigital@gmail.com" ||
+          !payload.includes("nutratechdigital@gmail.com") ||
+          !payload.includes(esperado) ||
+          !payload.includes("br.gov.bcb.pix")
+        ) {
+          pixChave.textContent = "Pix inconsistente. Recarregue a página.";
+          return;
+        }
+        pixTravado = Object.freeze({
+          id: dados.modalidade_id,
+          nome: dados.nome,
+          valor: dados.valor,
+          chave: dados.chave,
+          payload,
+          token: dados.token
+        });
+        pixPayloadAtual = pixTravado.payload;
+        pixTokenAtual = pixTravado.token;
+        pixValor.textContent = pixTravado.valor;
+        pixEmail.textContent = pixTravado.chave;
+        pixChave.textContent = pixTravado.payload;
+        resumo.innerHTML = `<div><b>Nome:</b> ${d.nome || "—"}</div><div><b>WhatsApp:</b> ${d.whatsapp || "—"}</div><div><b>Ingresso:</b> ${pixTravado.nome} · ${pixTravado.valor}</div>`;
+        btnPago.href = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensagemWhatsApp())}`;
+        btnCartao.href = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent("Olá! Quero pagar minha inscrição no Live Commerce 44 com cartão, pode me enviar o link?")}`;
+        if (dados.qr && String(dados.qr).indexOf("data:image") === 0) {
+          qrImg.src = dados.qr;
+        } else {
+          desenharQRCodePix(qrImg, pixTravado.payload);
+        }
+      } catch (_) {
+        pixChave.textContent = "Não foi possível gerar o Pix. Recarregue a página.";
+      }
+    }
+
+    function tickCountdown() {
+      let diff = EVENTO_INICIO.getTime() - Date.now();
+      if (diff < 0) diff = 0;
+      const pad = (n) => String(n).padStart(2, "0");
+      document.querySelector('[data-unit="days"]').textContent = pad(Math.floor(diff / 86400000));
+      document.querySelector('[data-unit="hours"]').textContent = pad(Math.floor((diff % 86400000) / 3600000));
+      document.querySelector('[data-unit="mins"]').textContent = pad(Math.floor((diff % 3600000) / 60000));
+      document.querySelector('[data-unit="secs"]').textContent = pad(Math.floor((diff % 60000) / 1000));
+    }
+
+    document.getElementById("btn-mais").addEventListener("click", () => {
+      const extra = document.getElementById("extra");
+      const btn = document.getElementById("btn-mais");
+      const open = extra.hasAttribute("hidden");
+      extra.toggleAttribute("hidden", !open);
+      btn.textContent = open ? "Ver menos" : "Ver mais";
+      btn.setAttribute("aria-expanded", String(open));
+    });
+
+    function atualizarResumo() {
+      const m = pixTravado || modalidadeAtual();
+      const d = dadosFormulario();
+      if (!m) return;
+      resumo.innerHTML = `<div><b>Nome:</b> ${d.nome || "—"}</div><div><b>WhatsApp:</b> ${d.whatsapp || "—"}</div><div><b>Ingresso:</b> ${m.nome} · ${m.valor}</div>`;
+      btnPago.href = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensagemWhatsApp())}`;
+      btnCartao.href = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent("Olá! Quero pagar minha inscrição no Live Commerce 44 com cartão, pode me enviar o link?")}`;
+    }
+
+    async function carregarIngressos() {
+      const res = await fetch("/api/ingressos", { cache: "no-store", credentials: "same-origin" });
+      const dados = await res.json();
+      if (!dados.ok || !Array.isArray(dados.ingressos)) throw new Error("catálogo");
+      MODALIDADES.splice(0, MODALIDADES.length, ...dados.ingressos.map((item) => Object.freeze(item)));
+      preencherSelects();
+      selectForm.setAttribute("autocomplete", "off");
+      await atualizarPix();
+    }
+
+    tickCountdown();
+    setInterval(tickCountdown, 1000);
+    carregarIngressos().catch(() => {
+      pixChave.textContent = "Não foi possível carregar o Pix. Recarregue a página.";
+    });
+
+    form.querySelector('[name="whatsapp"]').addEventListener("input", (e) => {
+      e.target.value = mascaraWhatsApp(e.target.value);
+      atualizarResumo();
+    });
+    form.querySelector('[name="nome"]').addEventListener("input", atualizarResumo);
+    selectForm.addEventListener("change", atualizarPix);
+
+    comprovante.addEventListener("change", () => {
+      const file = comprovante.files[0];
+      if (file) {
+        labelComprovante.innerHTML = `<b>Comprovante anexado</b><small>${file.name}</small>`;
+      } else {
+        labelComprovante.innerHTML = `<b>Anexar comprovante</b><small>JPG, PNG, WEBP ou PDF</small>`;
+      }
+      atualizarResumo();
+    });
+
+    btnPago.addEventListener("click", async (e) => {
+      e.preventDefault();
+      if (!validarFormulario()) {
+        form.scrollIntoView({ behavior: "smooth" });
+        return;
+      }
+      await atualizarPix();
+      if (!pixTokenAtual) return;
+      await salvarInscricao("pix");
+      const file = comprovante.files[0];
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: "Comprovante Live Commerce 44",
+            text: mensagemWhatsApp()
+          });
+          return;
+        } catch (_) {}
+      }
+      window.open(btnPago.href, "_blank", "noopener,noreferrer");
+    });
+
+    document.querySelectorAll("[data-ticket]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        selectForm.value = btn.getAttribute("data-ticket");
+        atualizarPix();
+        document.getElementById("pix").scrollIntoView({ behavior: "smooth" });
+      });
+    });
+
+    document.getElementById("btn-copiar-pix").addEventListener("click", async () => {
+      const btnCopiar = document.getElementById("btn-copiar-pix");
+      const copia = pixLimpo(pixPayloadAtual);
+      if (!copia) return;
+      const ok = await copiarPix(copia);
+      btnCopiar.textContent = ok ? "Copiado!" : "Toque no código e copie";
+      btnCopiar.classList.toggle("is-copied", ok);
+      document.getElementById("pix-copiado").textContent = ok ? "Cole no app do banco." : "Selecione o código Pix acima e copie.";
+      setTimeout(() => {
+        btnCopiar.textContent = "Copiar Pix";
+        btnCopiar.classList.remove("is-copied");
+        document.getElementById("pix-copiado").textContent = "";
+      }, 2200);
+    });
+  </script>
+</body>
+</html>
+

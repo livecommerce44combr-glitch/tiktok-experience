@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin · Live Commerce 44</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f7f5f1;
+      --white: #fff;
+      --ink: #111;
+      --muted: #6b6b6b;
+      --line: #ece8e1;
+      --pink: #e1067a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    }
+    .wrap { width: min(1100px, calc(100% - 28px)); margin: 0 auto; padding: 28px 0 60px; }
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      margin-bottom: 22px;
+    }
+    header strong { display: block; }
+    header small { color: var(--pink); font-size: .68rem; font-weight: 800; letter-spacing: .14em; }
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 8px 30px rgba(17,17,17,.06);
+      padding: 24px;
+    }
+    .login { width: min(420px, 100%); margin: 12vh auto 0; }
+    label { display: grid; gap: 6px; font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    input, select {
+      width: 100%; height: 48px; padding: 0 12px;
+      border: 1px solid #e4dfd6; border-radius: 12px; font: inherit;
+    }
+    button, .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 44px; padding: 0 16px; border: 0; border-radius: 10px;
+      background: #111; color: #fff; font: inherit; font-weight: 700; cursor: pointer;
+    }
+    .btn--ghost { background: #fff; color: #111; border: 1px solid var(--line); }
+    .btn--pink { background: var(--pink); }
+    .erro { color: #c00; font-size: .85rem; min-height: 1.2em; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .toolbar input { max-width: 280px; }
+    .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .stat {
+      padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: #faf9f7;
+    }
+    .stat b { display: block; font-size: 1.3rem; }
+    .stat span { color: var(--muted); font-size: .75rem; }
+    table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .pill {
+      display: inline-flex; padding: 3px 8px; border-radius: 999px;
+      font-size: .68rem; font-weight: 800; text-transform: uppercase;
+    }
+    .pill--pendente { background: #fff4d6; color: #7a5b00; }
+    .pill--confirmado { background: #ddf8ea; color: #0d6b3c; }
+    .empty { color: var(--muted); padding: 24px 0; text-align: center; }
+    .hidden { display: none !important; }
+    @media (max-width: 800px) {
+      table, thead, tbody, th, td, tr { display: block; }
+      th { display: none; }
+      td { border: 0; padding: 4px 0; }
+      tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card login" id="tela-login">
+      <p style="margin:0 0 6px;color:#e1067a;font-size:.72rem;font-weight:800;letter-spacing:.14em;">PAINEL ADMIN</p>
+      <h1 style="margin:0 0 8px;">Live Commerce 44</h1>
+      <p style="color:#6b6b6b;margin:0 0 18px;">Entre com a senha para ver as inscrições.</p>
+      <form id="form-login">
+        <label>
+          Senha
+          <input type="password" name="senha" autocomplete="current-password" required />
+        </label>
+        <p class="erro" id="login-erro"></p>
+        <button type="submit" class="btn--pink" style="width:100%;margin-top:8px;">Entrar</button>
+      </form>
+    </section>
+
+    <section id="tela-painel" class="hidden">
+      <header>
+        <div>
+          <strong>LIVE COMMERCE 44</strong>
+          <small>PAINEL DE INSCRIÇÕES</small>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn--ghost" id="btn-csv">Exportar CSV</button>
+          <button type="button" class="btn--ghost" id="btn-sair">Sair</button>
+        </div>
+      </header>
+      <div class="card">
+        <div class="stats">
+          <div class="stat"><b id="total">0</b><span>Inscrições</span></div>
+          <div class="stat"><b id="total-pendente">0</b><span>Pendentes</span></div>
+          <div class="stat"><b id="total-confirmado">0</b><span>Confirmadas</span></div>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="busca" placeholder="Buscar nome, WhatsApp ou ingresso" />
+        </div>
+        <div id="lista"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const loginTela = document.getElementById("tela-login");
+    const painelTela = document.getElementById("tela-painel");
+    const listaEl = document.getElementById("lista");
+    const busca = document.getElementById("busca");
+    let inscricoes = [];
+
+    function mostrarPainel(mostrar) {
+      loginTela.classList.toggle("hidden", mostrar);
+      painelTela.classList.toggle("hidden", !mostrar);
+    }
+
+    async function lerJson(res) {
+      const texto = await res.text();
+      try { return JSON.parse(texto); } catch (_) { return {}; }
+    }
+
+    async function carregar() {
+      const res = await fetch("/api/admin-inscricoes", { credentials: "same-origin" });
+      if (res.status === 401) {
+        mostrarPainel(false);
+        return;
+      }
+      const dados = await lerJson(res);
+      if (!res.ok) {
+        inscricoes = [];
+        mostrarPainel(true);
+        listaEl.innerHTML = `<p class="empty">${esc(dados.erro || "Não foi possível carregar as inscrições.")}</p>`;
+        return;
+      }
+      inscricoes = dados.inscricoes || [];
+      mostrarPainel(true);
+      render();
+    }
+
+    function render() {
+      const q = busca.value.trim().toLowerCase();
+      const filtradas = inscricoes.filter((item) => {
+        const blob = [item.nome, item.whatsapp, item.modalidade, item.indicacao, item.valor].join(" ").toLowerCase();
+        return !q || blob.includes(q);
+      });
+      document.getElementById("total").textContent = String(inscricoes.length);
+      document.getElementById("total-pendente").textContent = String(inscricoes.filter((i) => i.status === "pendente").length);
+      document.getElementById("total-confirmado").textContent = String(inscricoes.filter((i) => i.status === "confirmado").length);
+      if (!filtradas.length) {
+        listaEl.innerHTML = '<p class="empty">Nenhuma inscrição encontrada.</p>';
+        return;
+      }
+      listaEl.innerHTML = `<table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Nome</th>
+            <th>WhatsApp</th>
+            <th>Indicação</th>
+            <th>Ingresso</th>
+            <th>Status</th>
+            <th>Comprovante</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtradas.map((item) => `
+            <tr>
+              <td>${esc(item.criado_em || "")}</td>
+              <td><b>${esc(item.nome)}</b></td>
+              <td>${esc(item.whatsapp)}</td>
+              <td>${esc(item.indicacao || "—")}</td>
+              <td>${esc(item.modalidade || "")}<br><small>${esc(item.valor || "")}</small></td>
+              <td>
+                <span class="pill pill--${item.status === "confirmado" ? "confirmado" : "pendente"}">${item.status === "confirmado" ? "Confirmado" : "Pendente"}</span>
+                <div style="margin-top:8px;">
+                  <button type="button" class="btn--ghost" data-status="${item.id}" data-next="${item.status === "confirmado" ? "pendente" : "confirmado"}">
+                    ${item.status === "confirmado" ? "Marcar pendente" : "Confirmar"}
+                  </button>
+                </div>
+              </td>
+              <td>
+                ${item.comprovante_arquivo
+                  ? `<a class="btn--ghost" href="/api/admin-comprovante?id=${item.id}" target="_blank" rel="noopener">Ver arquivo</a>`
+                  : "<small>Sem arquivo</small>"}
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>`;
+      listaEl.querySelectorAll("[data-status]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          await fetch(`/api/admin-status?id=${btn.getAttribute("data-status")}`, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: btn.getAttribute("data-next") })
+          });
+          carregar();
+        });
+      });
+    }
+
+    function esc(valor) {
+      return String(valor)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    document.getElementById("form-login").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const senha = new FormData(e.target).get("senha");
+      document.getElementById("login-erro").textContent = "";
+      const res = await fetch("/api/admin-login", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ senha })
+      });
+      const dados = await lerJson(res);
+      if (!res.ok) {
+        document.getElementById("login-erro").textContent = dados.erro || "Não foi possível entrar.";
+        return;
+      }
+      e.target.reset();
+      carregar();
+    });
+
+    document.getElementById("btn-sair").addEventListener("click", async () => {
+      await fetch("/api/admin-logout", { method: "POST", credentials: "same-origin" });
+      inscricoes = [];
+      mostrarPainel(false);
+    });
+
+    busca.addEventListener("input", render);
+
+    document.getElementById("btn-csv").addEventListener("click", () => {
+      const linhas = [["Data", "Nome", "WhatsApp", "Indicacao", "Modalidade", "Valor", "Status", "Comprovante"]];
+      inscricoes.forEach((item) => {
+        linhas.push([
+          item.criado_em, item.nome, item.whatsapp, item.indicacao,
+          item.modalidade, item.valor, item.status,
+          item.comprovante_nome_original || ""
+        ]);
+      });
+      const csv = linhas.map((l) => l.map((c) => `"${String(c || "").replaceAll('"', '""')}"`).join(";")).join("\n");
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "inscricoes-live-commerce-44.csv";
+      a.click();
+    });
+
+    carregar();
+  </script>
+</body>
+</html>
