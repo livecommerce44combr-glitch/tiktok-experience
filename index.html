@@ -59,6 +59,7 @@
       line-height: 1.55;
     }
     body.modal-open { overflow: hidden; }
+    html.modal-open-ios, html.modal-open-ios body { overscroll-behavior: none; }
     img { display: block; max-width: 100%; height: auto; }
     a { color: inherit; text-decoration: none; }
     button, select, input { font: inherit; color: inherit; }
@@ -408,15 +409,32 @@
     }
 
     .grupo-modal {
-      position: fixed; inset: 0; z-index: 80;
-      display: none; place-items: center;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      min-height: 100%;
+      z-index: 2147483000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 20px;
-      background: rgba(10, 8, 16, .62);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+      background: rgba(10, 8, 16, .72);
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
     .grupo-modal.is-open,
-    .grupo-modal.is-open[hidden] { display: grid !important; }
+    .grupo-modal.is-open[hidden] {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto;
+    }
     .grupo-modal__card {
       position: relative;
       overflow: hidden;
@@ -519,21 +537,19 @@
       font-size: .72rem;
       font-weight: 600;
     }
-    @media (prefers-reduced-motion: no-preference) {
-      .grupo-modal.is-open { animation: grupo-fade .32s ease; }
+    @media (prefers-reduced-motion: no-preference) and (hover: hover) {
+      .grupo-modal.is-open { transition: opacity .32s ease, visibility .32s ease; }
       .grupo-modal.is-open .grupo-modal__card { animation: grupo-pop .55s cubic-bezier(.18, 1.2, .32, 1); }
-      .grupo-modal.is-open .grupo-modal__badge { animation: grupo-up .45s ease .08s both; }
-      .grupo-modal.is-open .grupo-modal__icon-wrap { animation: grupo-up .5s ease .12s both; }
-      .grupo-modal.is-open h2 { animation: grupo-up .5s ease .18s both; }
-      .grupo-modal.is-open p { animation: grupo-up .5s ease .24s both; }
-      .grupo-modal.is-open .grupo-modal__cta { animation: grupo-up .5s ease .3s both, grupo-cta-pulse 1.8s ease 1s infinite; }
-      .grupo-modal.is-open .grupo-modal__hint { animation: grupo-up .5s ease .36s both; }
       .grupo-modal.is-open .grupo-modal__icon { animation: grupo-icon-bob 2.4s ease-in-out infinite; }
       .grupo-modal.is-open .grupo-modal__ripple { animation: grupo-ripple 2.2s ease-out infinite; }
       .grupo-modal.is-open .grupo-modal__ripple--delay { animation-delay: 1.1s; }
       .grupo-modal.is-open .grupo-modal__badge i { animation: grupo-live 1.4s ease-out infinite; }
       .grupo-modal.is-open .grupo-modal__cta::after { animation: grupo-shine 2.4s ease-in-out 1.1s infinite; }
+      .grupo-modal.is-open .grupo-modal__cta { animation: grupo-cta-pulse 1.8s ease 1s infinite; }
       .grupo-modal.is-open .grupo-modal__glow { animation: grupo-glow 2.8s ease-in-out infinite; }
+    }
+    @media (hover: none) {
+      .grupo-modal { background: rgba(10, 8, 16, .78); }
     }
     @keyframes grupo-fade { from { opacity: 0; } to { opacity: 1; } }
     @keyframes grupo-pop {
@@ -787,7 +803,7 @@
     </section>
   </main>
 
-  <div class="grupo-modal" id="modal-grupo-whatsapp" role="dialog" aria-modal="true" aria-labelledby="titulo-grupo-whatsapp">
+  <div class="grupo-modal" id="modal-grupo-whatsapp" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="titulo-grupo-whatsapp">
     <div class="grupo-modal__card">
       <span class="grupo-modal__glow" aria-hidden="true"></span>
       <button type="button" class="grupo-modal__close" id="btn-fechar-grupo" aria-label="Fechar">&times;</button>
@@ -832,27 +848,57 @@
       var modal = document.getElementById("modal-grupo-whatsapp");
       if (!modal) return;
       var aberto = false;
+      var inicio = Date.now();
+      var timer = 0;
+      function ios() {
+        var ua = navigator.userAgent || "";
+        return /iP(hone|ad|od)/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      }
       function abrir() {
         if (aberto) return;
         aberto = true;
+        if (timer) clearInterval(timer);
         modal.removeAttribute("hidden");
         modal.classList.add("is-open");
-        document.body.classList.add("modal-open");
+        modal.setAttribute("aria-hidden", "false");
+        if (ios()) document.documentElement.classList.add("modal-open-ios");
+        else document.body.classList.add("modal-open");
       }
-      function fechar() {
+      function fechar(e) {
+        if (e) e.preventDefault();
         aberto = false;
         modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
         document.body.classList.remove("modal-open");
+        document.documentElement.classList.remove("modal-open-ios");
+      }
+      function tentar() {
+        if (Date.now() - inicio >= 5000) abrir();
       }
       var fecharBtn = document.getElementById("btn-fechar-grupo");
-      if (fecharBtn) fecharBtn.addEventListener("click", fechar);
+      if (fecharBtn) {
+        fecharBtn.addEventListener("click", fechar);
+        fecharBtn.addEventListener("touchend", fechar, { passive: false });
+      }
       modal.addEventListener("click", function (e) {
-        if (e.target === modal) fechar();
+        if (e.target === modal) fechar(e);
       });
       document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && modal.classList.contains("is-open")) fechar();
+        if (e.key === "Escape" && modal.classList.contains("is-open")) fechar(e);
       });
+      timer = setInterval(tentar, 200);
       setTimeout(abrir, 5000);
+      ["touchstart", "touchend", "scroll", "click", "pageshow", "focus"].forEach(function (ev) {
+        window.addEventListener(ev, tentar, true);
+      });
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) tentar();
+      });
+      function loop() {
+        tentar();
+        if (!aberto && window.requestAnimationFrame) requestAnimationFrame(loop);
+      }
+      if (window.requestAnimationFrame) requestAnimationFrame(loop);
     })();
   </script>
   <script src="qrcode-generator.js"></script>
