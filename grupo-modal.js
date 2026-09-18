@@ -6,11 +6,20 @@
   var modal = document.getElementById("modal-grupo-whatsapp");
   if (!modal) return;
 
-  try {
-    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) {
-      document.documentElement.classList.add("grupo-static");
+  var ua = navigator.userAgent || "";
+  var ios = /iP(hone|ad|od)/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var mobile = ios || /Android|Mobile|webOS|Silk/i.test(ua) || ("ontouchstart" in window && Math.min(screen.width, screen.height) < 1024);
+  document.documentElement.classList.add("grupo-static");
+  if (!mobile) {
+    document.documentElement.classList.remove("grupo-static");
+    document.documentElement.classList.add("grupo-motion");
+  } else {
+    document.documentElement.classList.remove("grupo-motion");
+    var extras = modal.querySelectorAll(".grupo-modal__ripple, .grupo-modal__glow");
+    for (var i = 0; i < extras.length; i++) {
+      extras[i].parentNode.removeChild(extras[i]);
     }
-  } catch (e) {}
+  }
 
   var inicio = Date.now();
   var aberto = false;
@@ -26,10 +35,7 @@
     if (aberto) return;
     aberto = true;
     if (timer) clearInterval(timer);
-    modal.style.webkitAnimation = "none";
-    modal.style.animation = "none";
-    modal.style.webkitTransform = "none";
-    modal.style.transform = "none";
+    modal.style.cssText += ";animation:none!important;-webkit-animation:none!important;transform:none;filter:none;";
     modal.classList.remove("is-closed");
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");
