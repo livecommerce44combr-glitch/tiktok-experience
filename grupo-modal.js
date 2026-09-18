@@ -6,6 +6,12 @@
   var modal = document.getElementById("modal-grupo-whatsapp");
   if (!modal) return;
 
+  try {
+    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) {
+      document.documentElement.classList.add("grupo-static");
+    }
+  } catch (e) {}
+
   var inicio = Date.now();
   var aberto = false;
   var fechado = false;
@@ -20,6 +26,10 @@
     if (aberto) return;
     aberto = true;
     if (timer) clearInterval(timer);
+    modal.style.webkitAnimation = "none";
+    modal.style.animation = "none";
+    modal.style.webkitTransform = "none";
+    modal.style.transform = "none";
     modal.classList.remove("is-closed");
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");

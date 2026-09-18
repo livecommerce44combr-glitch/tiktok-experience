@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <!-- grupo-modal 2026-09-18-v4 -->
+  <!-- grupo-modal 2026-09-18-v5 -->
   <script src="/grupo-modal.js" defer></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-79NQ1X2R66"></script>
@@ -415,7 +415,6 @@
       top: 0; left: 0; right: 0; bottom: 0;
       width: 100%;
       height: 100%;
-      height: 100dvh;
       min-height: 100%;
       z-index: 2147483000;
       display: flex;
@@ -423,14 +422,10 @@
       justify-content: center;
       padding: 20px;
       padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
-      background: rgba(10, 8, 16, .72);
+      background: rgba(10, 8, 16, .78);
       visibility: hidden;
       opacity: 0;
       pointer-events: none;
-      -webkit-transform: translate3d(0, 0, 0);
-      transform: translate3d(0, 0, 0);
-      -webkit-animation: grupo-revelar 0.35s ease 5s forwards;
-      animation: grupo-revelar 0.35s ease 5s forwards;
     }
     .grupo-modal.is-open,
     .grupo-modal.is-open[hidden] {
@@ -438,8 +433,8 @@
       visibility: visible !important;
       opacity: 1 !important;
       pointer-events: auto;
-      -webkit-animation: none;
-      animation: none;
+      -webkit-animation: none !important;
+      animation: none !important;
     }
     .grupo-modal.is-closed,
     #grupo-modal-off:target + .grupo-modal {
@@ -542,6 +537,8 @@
       width: 40%;
       background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
       transform: skewX(-20deg);
+      opacity: 0;
+      pointer-events: none;
     }
     .grupo-modal__cta:hover {
       transform: translateY(-2px) scale(1.02);
@@ -553,27 +550,64 @@
       font-size: .72rem;
       font-weight: 600;
     }
-    @media (prefers-reduced-motion: no-preference) and (hover: hover) {
-      .grupo-modal.is-open { transition: opacity .32s ease, visibility .32s ease; }
+    @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+      .grupo-modal {
+        -webkit-animation: grupo-revelar 0.35s ease 5s forwards;
+        animation: grupo-revelar 0.35s ease 5s forwards;
+      }
+      .grupo-modal.is-open { transition: opacity .32s ease; }
       .grupo-modal.is-open .grupo-modal__card { animation: grupo-pop .55s cubic-bezier(.18, 1.2, .32, 1); }
       .grupo-modal.is-open .grupo-modal__icon { animation: grupo-icon-bob 2.4s ease-in-out infinite; }
       .grupo-modal.is-open .grupo-modal__ripple { animation: grupo-ripple 2.2s ease-out infinite; }
       .grupo-modal.is-open .grupo-modal__ripple--delay { animation-delay: 1.1s; }
       .grupo-modal.is-open .grupo-modal__badge i { animation: grupo-live 1.4s ease-out infinite; }
-      .grupo-modal.is-open .grupo-modal__cta::after { animation: grupo-shine 2.4s ease-in-out 1.1s infinite; }
+      .grupo-modal.is-open .grupo-modal__cta::after { opacity: 1; animation: grupo-shine 2.4s ease-in-out 1.1s infinite; }
       .grupo-modal.is-open .grupo-modal__cta { animation: grupo-cta-pulse 1.8s ease 1s infinite; }
       .grupo-modal.is-open .grupo-modal__glow { animation: grupo-glow 2.8s ease-in-out infinite; }
     }
-    @media (hover: none) {
-      .grupo-modal { background: rgba(10, 8, 16, .78); }
+    @media (hover: none), (pointer: coarse) {
+      .grupo-modal,
+      .grupo-modal.is-open,
+      .grupo-modal.is-open .grupo-modal__card,
+      .grupo-modal.is-open .grupo-modal__icon,
+      .grupo-modal.is-open .grupo-modal__ripple,
+      .grupo-modal.is-open .grupo-modal__cta,
+      .grupo-modal.is-open .grupo-modal__cta::after,
+      .grupo-modal.is-open .grupo-modal__glow,
+      .grupo-modal.is-open .grupo-modal__badge i {
+        -webkit-animation: none !important;
+        animation: none !important;
+        transition: none !important;
+        filter: none;
+        transform: none;
+      }
+      .grupo-modal__ripple,
+      .grupo-modal__glow,
+      .grupo-modal__cta::after { display: none !important; }
+      .grupo-modal__icon { filter: none; }
+      .grupo-modal__card {
+        box-shadow: 0 16px 40px rgba(17, 17, 17, .28);
+      }
+    html.grupo-static .grupo-modal,
+    html.grupo-static .grupo-modal.is-open .grupo-modal__card,
+    html.grupo-static .grupo-modal.is-open .grupo-modal__icon,
+    html.grupo-static .grupo-modal.is-open .grupo-modal__cta {
+      -webkit-animation: none !important;
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+      filter: none !important;
     }
+    html.grupo-static .grupo-modal__ripple,
+    html.grupo-static .grupo-modal__glow,
+    html.grupo-static .grupo-modal__cta::after { display: none !important; }
     @keyframes grupo-revelar {
-      from { visibility: hidden; opacity: 0; pointer-events: none; }
-      to { visibility: visible; opacity: 1; pointer-events: auto; }
+      from { opacity: 0; }
+      to { opacity: 1; visibility: visible; }
     }
     @-webkit-keyframes grupo-revelar {
-      from { visibility: hidden; opacity: 0; pointer-events: none; }
-      to { visibility: visible; opacity: 1; pointer-events: auto; }
+      from { opacity: 0; }
+      to { opacity: 1; visibility: visible; }
     }
     @keyframes grupo-fade { from { opacity: 0; } to { opacity: 1; } }
     @keyframes grupo-pop {
