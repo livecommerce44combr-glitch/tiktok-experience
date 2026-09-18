@@ -7,6 +7,7 @@
 # ============================================================
 PORTA = 8766
 CHAVE_PIX = "nutratechdigital@gmail.com"
+WHATSAPP_NUMERO = "5562995360202"
 PIX_RECEBEDOR = "LIVE COMMERCE 44"
 PIX_CIDADE = "GOIANIA"
 HOSTS_LOCAIS = {"127.0.0.1", "localhost"}
@@ -33,6 +34,7 @@ DATA_FILE = ROOT / "inscricoes.json"
 UPLOADS = ROOT / "uploads"
 SECRET_FILE = ROOT / ".admin_secret"
 PASSWORD_FILE = ROOT / ".admin_password"
+WHATSAPP_NUMERO = "".join(ch for ch in os.environ.get("WHATSAPP_NUMERO", WHATSAPP_NUMERO) if ch.isdigit())
 EXT_BLOQUEADAS = {".py", ".json", ".secret", ".md", ".gitignore"}
 ARQUIVOS_BLOQUEADOS = {"inscricoes.json", ".admin_secret", ".admin_password", "server.py", ".gitignore"}
 TIPOS_OK = {".jpg", ".jpeg", ".png", ".webp", ".pdf"}
@@ -164,7 +166,7 @@ def montar_pix(valor_numero):
 
 
 def pix_token(modalidade_id, payload, expira, ip):
-    msg = ("%s|%s|%s|%s" % (modalidade_id, payload, expira, ip)).encode("utf-8")
+    msg = ("%s|%s|%s|%s|%s|%s" % (modalidade_id, payload, expira, ip, CHAVE_PIX, WHATSAPP_NUMERO)).encode("utf-8")
     return hmac.new(secret(), msg, hashlib.sha256).hexdigest()
 
 
@@ -245,8 +247,7 @@ class Handler(SimpleHTTPRequestHandler):
         super().end_headers()
 
     def _request_host(self):
-        forwarded = (self.headers.get("X-Forwarded-Host") or "").split(",")[0].strip()
-        host = (forwarded or self.headers.get("Host") or "").split(":")[0].strip().lower()
+        host = (self.headers.get("Host") or "").split(":")[0].strip().lower()
         extra = {h.strip().lower() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()}
         if extra:
             return host if host in extra or host in HOSTS_LOCAIS else ""
@@ -269,7 +270,7 @@ class Handler(SimpleHTTPRequestHandler):
         if referer:
             parsed = urllib.parse.urlparse(referer)
             return (parsed.hostname or "").lower() == host
-        return True
+        return False
 
     def _rate(self, chave, limite, janela):
         agora = time.time()
@@ -331,7 +332,7 @@ class Handler(SimpleHTTPRequestHandler):
                 if not self._origem_ok():
                     return self._json(403, {"ok": False, "erro": "Origem inválida"})
                 lista = [{"id": i["id"], "nome": i["nome"], "valor": i["valor"], "label": i["label"]} for i in INGRESSOS.values()]
-                return self._json(200, {"ok": True, "ingressos": lista})
+                return self._json(200, {"ok": True, "ingressos": lista, "whatsapp": WHATSAPP_NUMERO, "chave_pix": CHAVE_PIX})
 
             if path == "/api/pix":
                 if not self._origem_ok():
@@ -358,6 +359,7 @@ class Handler(SimpleHTTPRequestHandler):
                     "chave": CHAVE_PIX,
                     "payload": payload,
                     "token": token,
+                    "whatsapp": WHATSAPP_NUMERO,
                 })
 
             if path == "/api/admin/inscricoes":

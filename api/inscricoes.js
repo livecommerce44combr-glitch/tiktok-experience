@@ -2,7 +2,7 @@
 
 const crypto = require("crypto");
 const Busboy = require("busboy");
-const { INGRESSOS, ID_OK, json, origemOk, pixTokenValido } = require("../lib/pix");
+const { INGRESSOS, ID_OK, json, origemOk, pixTokenValido, rateOk } = require("../lib/pix");
 const { lerInscricoes, gravarInscricoes, salvarArquivo } = require("../lib/store");
 
 const TIPOS = {
@@ -49,6 +49,7 @@ function parseMultipart(req) {
 module.exports = async (req, res) => {
   if (req.method !== "POST") return json(res, 405, { ok: false, erro: "Método não permitido" });
   if (!origemOk(req)) return json(res, 403, { ok: false, erro: "Origem inválida" });
+  if (!rateOk(req, "insc", 20, 60_000)) return json(res, 429, { ok: false, erro: "Muitas tentativas" });
 
   const ctype = String(req.headers["content-type"] || "");
   if (!ctype.toLowerCase().includes("multipart/form-data")) {

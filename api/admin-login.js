@@ -1,11 +1,12 @@
 "use strict";
 
 const { senhaOk, criarToken, setCookie, TTL } = require("../lib/auth");
-const { json, origemOk } = require("../lib/pix");
+const { json, origemOk, rateOk } = require("../lib/pix");
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") return json(res, 405, { ok: false, erro: "Método não permitido" });
   if (!origemOk(req)) return json(res, 403, { ok: false, erro: "Origem inválida" });
+  if (!rateOk(req, "login", 8, 60_000)) return json(res, 429, { ok: false, erro: "Muitas tentativas" });
 
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);
