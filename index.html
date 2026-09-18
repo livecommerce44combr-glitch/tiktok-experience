@@ -2,7 +2,9 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- grupo-modal 2026-09-18-v4 -->
+  <script src="/grupo-modal.js" defer></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-79NQ1X2R66"></script>
   <script>
@@ -425,8 +427,10 @@
       visibility: hidden;
       opacity: 0;
       pointer-events: none;
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+      -webkit-animation: grupo-revelar 0.35s ease 5s forwards;
+      animation: grupo-revelar 0.35s ease 5s forwards;
     }
     .grupo-modal.is-open,
     .grupo-modal.is-open[hidden] {
@@ -434,6 +438,16 @@
       visibility: visible !important;
       opacity: 1 !important;
       pointer-events: auto;
+      -webkit-animation: none;
+      animation: none;
+    }
+    .grupo-modal.is-closed,
+    #grupo-modal-off:target + .grupo-modal {
+      -webkit-animation: none !important;
+      animation: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
     .grupo-modal__card {
       position: relative;
@@ -477,6 +491,8 @@
       border: 0; border-radius: 999px;
       background: #f1eee8; color: var(--ink);
       font-size: 1.2rem; line-height: 1; cursor: pointer;
+      display: grid; place-items: center;
+      text-decoration: none;
       transition: transform .2s ease, background .2s ease;
     }
     .grupo-modal__close:hover { background: #ece8e1; transform: rotate(90deg); }
@@ -551,6 +567,14 @@
     @media (hover: none) {
       .grupo-modal { background: rgba(10, 8, 16, .78); }
     }
+    @keyframes grupo-revelar {
+      from { visibility: hidden; opacity: 0; pointer-events: none; }
+      to { visibility: visible; opacity: 1; pointer-events: auto; }
+    }
+    @-webkit-keyframes grupo-revelar {
+      from { visibility: hidden; opacity: 0; pointer-events: none; }
+      to { visibility: visible; opacity: 1; pointer-events: auto; }
+    }
     @keyframes grupo-fade { from { opacity: 0; } to { opacity: 1; } }
     @keyframes grupo-pop {
       0% { opacity: 0; transform: translateY(28px) scale(.86); }
@@ -613,7 +637,7 @@
   <main class="page" id="topo">
     <div class="poster">
       <img
-        src="banner-live-commerce-44.jpg"
+        src="/banner-live-commerce-44.jpg"
         alt="Live Commerce 44 — palestrantes confirmados, 11 de outubro, 9h às 16h, Shopping Gallo"
       />
     </div>
@@ -630,7 +654,7 @@
 
       <div class="place">
         <a class="place__visual" href="https://maps.app.goo.gl/vjEqXwfVGzBBo5rq9" target="_blank" rel="noopener noreferrer">
-          <img src="banner-local-shopping-gallo.jpg" alt="Shopping Gallo — local do Live Commerce 44" />
+          <img src="/banner-local-shopping-gallo.jpg" alt="Shopping Gallo — local do Live Commerce 44" />
         </a>
         <div class="place__copy">
           <p class="place__eyebrow">Um espaço novo e maior</p>
@@ -803,10 +827,11 @@
     </section>
   </main>
 
+  <span id="grupo-modal-off" hidden></span>
   <div class="grupo-modal" id="modal-grupo-whatsapp" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="titulo-grupo-whatsapp">
     <div class="grupo-modal__card">
       <span class="grupo-modal__glow" aria-hidden="true"></span>
-      <button type="button" class="grupo-modal__close" id="btn-fechar-grupo" aria-label="Fechar">&times;</button>
+      <a class="grupo-modal__close" id="btn-fechar-grupo" href="#grupo-modal-off" aria-label="Fechar">&times;</a>
       <span class="grupo-modal__badge"><i></i> Grupo oficial</span>
       <div class="grupo-modal__icon-wrap" aria-hidden="true">
         <span class="grupo-modal__ripple"></span>
@@ -843,66 +868,8 @@
     </div>
   </div>
 
-  <script>
-    (function () {
-      var modal = document.getElementById("modal-grupo-whatsapp");
-      if (!modal) return;
-      var aberto = false;
-      var inicio = Date.now();
-      var timer = 0;
-      function ios() {
-        var ua = navigator.userAgent || "";
-        return /iP(hone|ad|od)/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-      }
-      function abrir() {
-        if (aberto) return;
-        aberto = true;
-        if (timer) clearInterval(timer);
-        modal.removeAttribute("hidden");
-        modal.classList.add("is-open");
-        modal.setAttribute("aria-hidden", "false");
-        if (ios()) document.documentElement.classList.add("modal-open-ios");
-        else document.body.classList.add("modal-open");
-      }
-      function fechar(e) {
-        if (e) e.preventDefault();
-        aberto = false;
-        modal.classList.remove("is-open");
-        modal.setAttribute("aria-hidden", "true");
-        document.body.classList.remove("modal-open");
-        document.documentElement.classList.remove("modal-open-ios");
-      }
-      function tentar() {
-        if (Date.now() - inicio >= 5000) abrir();
-      }
-      var fecharBtn = document.getElementById("btn-fechar-grupo");
-      if (fecharBtn) {
-        fecharBtn.addEventListener("click", fechar);
-        fecharBtn.addEventListener("touchend", fechar, { passive: false });
-      }
-      modal.addEventListener("click", function (e) {
-        if (e.target === modal) fechar(e);
-      });
-      document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && modal.classList.contains("is-open")) fechar(e);
-      });
-      timer = setInterval(tentar, 200);
-      setTimeout(abrir, 5000);
-      ["touchstart", "touchend", "scroll", "click", "pageshow", "focus"].forEach(function (ev) {
-        window.addEventListener(ev, tentar, true);
-      });
-      document.addEventListener("visibilitychange", function () {
-        if (!document.hidden) tentar();
-      });
-      function loop() {
-        tentar();
-        if (!aberto && window.requestAnimationFrame) requestAnimationFrame(loop);
-      }
-      if (window.requestAnimationFrame) requestAnimationFrame(loop);
-    })();
-  </script>
-  <script src="qrcode-generator.js"></script>
-  <script src="qr-local.js"></script>
+  <script src="/qrcode-generator.js"></script>
+  <script src="/qr-local.js"></script>
   <script>
     /* Número do WhatsApp e chave Pix só vêm do servidor. */
     let whatsappOficial = "";

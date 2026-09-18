@@ -403,6 +403,12 @@ class Handler(SimpleHTTPRequestHandler):
         ext = Path(nome).suffix.lower()
         if nome in ARQUIVOS_BLOQUEADOS or ext in EXT_BLOQUEADAS:
             return self._texto(403, "Acesso negado")
+        destino = ROOT / path.lstrip("/")
+        if path not in ("/", "/index.html") and not destino.is_file():
+            if ext in {".js", ".css", ".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg", ".ico", ".woff", ".woff2", ".map", ".txt"}:
+                return self._texto(404, "Não encontrado")
+            self.path = "/index.html"
+            return SimpleHTTPRequestHandler.do_GET(self)
         self.path = path
         return SimpleHTTPRequestHandler.do_GET(self)
 

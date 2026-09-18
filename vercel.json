@@ -1,13 +1,41 @@
 {
+  "trailingSlash": false,
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/api/admin/login", "destination": "/api/admin-login" },
     { "source": "/api/admin/logout", "destination": "/api/admin-logout" },
     { "source": "/api/admin/inscricoes", "destination": "/api/admin-inscricoes" },
     { "source": "/api/admin/inscricoes/:id/status", "destination": "/api/admin-status?id=:id" },
-    { "source": "/api/admin/comprovante/:id", "destination": "/api/admin-comprovante?id=:id" }
+    { "source": "/api/admin/comprovante/:id", "destination": "/api/admin-comprovante?id=:id" },
+    { "source": "/inscricao", "destination": "/index.html" },
+    { "source": "/inscrever", "destination": "/index.html" },
+    { "source": "/evento", "destination": "/index.html" },
+    { "source": "/live", "destination": "/index.html" },
+    { "source": "/grupo", "destination": "/index.html" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
+    {
+      "source": "/",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" },
+        { "key": "CDN-Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" },
+        { "key": "CDN-Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
+      "source": "/grupo-modal.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" },
+        { "key": "CDN-Cache-Control", "value": "no-store" }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
