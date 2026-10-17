@@ -1,7 +1,7 @@
 {
   "name": "livecommerce44",
   "private": true,
-  "description": "Inscrição Live Commerce 44",
+  "description": "Inscrição TikTok Experience Caldas Novas",
   "dependencies": {
     "@vercel/blob": "^2.8.0",
     "busboy": "^1.6.0",

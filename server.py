@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Servidor da inscrição Live Commerce 44 + painel admin."""
+"""Servidor da inscrição TikTok Experience Caldas Novas + painel admin."""
 
 # ============================================================
 # REVISAR ANTES DE PUBLICAR
 # ============================================================
 PORTA = 8766
-CHAVE_PIX = "nutratechdigital@gmail.com"
-WHATSAPP_NUMERO = "5562995360202"
-PIX_RECEBEDOR = "LIVE COMMERCE 44"
+CHAVE_PIX = "arcano.com.br@gmail.com"
+WHATSAPP_NUMERO = "5562981201160"
+PIX_RECEBEDOR = "TIKTOK EXPERIENCE CN"
 PIX_CIDADE = "GOIANIA"
 HOSTS_LOCAIS = {"127.0.0.1", "localhost"}
 # Senha do admin: variável ADMIN_SENHA ou arquivo .admin_password (fora do git)
@@ -44,11 +44,7 @@ ID_OK = re.compile(r"^[a-z0-9-]{3,40}$")
 HEX_OK = re.compile(r"^[a-f0-9]{16}$")
 
 INGRESSOS = {
-    "basic-individual": {"id": "basic-individual", "nome": "Basic · Individual", "valor": "R$ 97,00", "valor_numero": "97.00", "label": "Basic · Individual — R$ 97,00"},
-    "basic-duplo": {"id": "basic-duplo", "nome": "Basic · Duplo", "valor": "R$ 147,00", "valor_numero": "147.00", "label": "Basic · Duplo 🔥 — R$ 147,00"},
-    "premium-individual": {"id": "premium-individual", "nome": "Premium · Individual", "valor": "R$ 297,00", "valor_numero": "297.00", "label": "Premium · Individual — R$ 297,00"},
-    "premium-duplo": {"id": "premium-duplo", "nome": "Premium · Duplo", "valor": "R$ 397,00", "valor_numero": "397.00", "label": "Premium · Duplo — R$ 397,00"},
-    "patrocinador": {"id": "patrocinador", "nome": "Cota Patrocinador · até 5 pessoas", "valor": "R$ 597,00", "valor_numero": "597.00", "label": "Cota Patrocinador · até 5 pessoas — R$ 597,00"},
+    "primeiro-lote": {"id": "primeiro-lote", "nome": "1º lote", "valor": "R$ 29,90", "valor_numero": "29.90", "label": "1º lote — R$ 29,90"},
 }
 
 GET_API = {"/api/pix", "/api/ingressos", "/api/admin/inscricoes"}
@@ -581,7 +577,7 @@ def main():
     bind = os.environ.get("BIND", "127.0.0.1")
     porta = int(os.environ.get("PORT", PORTA))
     server = ThreadingHTTPServer((bind, porta), Handler)
-    print("Live Commerce 44")
+    print("TikTok Experience Caldas Novas")
     print("Inscrição: http://%s:%s/" % (bind, porta))
     print("Admin:     http://%s:%s/admin" % (bind, porta))
     server.serve_forever()
