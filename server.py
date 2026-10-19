@@ -31,12 +31,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 DATA_FILE = ROOT / "inscricoes.json"
+PARCEIROS_FILE = ROOT / "parceiros.json"
 UPLOADS = ROOT / "uploads"
 SECRET_FILE = ROOT / ".admin_secret"
 PASSWORD_FILE = ROOT / ".admin_password"
 WHATSAPP_NUMERO = "".join(ch for ch in os.environ.get("WHATSAPP_NUMERO", WHATSAPP_NUMERO) if ch.isdigit())
 EXT_BLOQUEADAS = {".py", ".json", ".secret", ".md", ".gitignore"}
-ARQUIVOS_BLOQUEADOS = {"inscricoes.json", ".admin_secret", ".admin_password", "server.py", ".gitignore"}
+ARQUIVOS_BLOQUEADOS = {"inscricoes.json", "parceiros.json", ".admin_secret", ".admin_password", "server.py", ".gitignore"}
+PARCEIRO_IDS = ("1", "2", "3", "4", "5")
 TIPOS_OK = {".jpg", ".jpeg", ".png", ".webp", ".pdf"}
 MAX_ARQUIVO = 5 * 1024 * 1024
 PIX_TOKEN_TTL = 30 * 60
@@ -44,7 +46,7 @@ ID_OK = re.compile(r"^[a-z0-9-]{3,40}$")
 HEX_OK = re.compile(r"^[a-f0-9]{16}$")
 
 INGRESSOS = {
-    "primeiro-lote": {"id": "primeiro-lote", "nome": "1º lote", "valor": "R$ 29,90", "valor_numero": "29.90", "label": "1º lote — R$ 29,90"},
+    "primeiro-lote": {"id": "primeiro-lote", "nome": "1º lote", "valor": "R$ 49,90", "valor_numero": "49.90", "label": "1º lote — R$ 49,90"},
 }
 
 GET_API = {"/api/pix", "/api/ingressos", "/api/admin/inscricoes"}
@@ -99,6 +101,37 @@ def gravar_inscricoes(lista):
     tmp = DATA_FILE.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(lista, ensure_ascii=False, indent=2), encoding="utf-8")
     os.replace(tmp, DATA_FILE)
+
+
+def limpar_nome_parceiro(nome):
+    return re.sub(r"\s+", " ", str(nome or "")).strip()[:60]
+
+
+def ler_parceiros():
+    nomes = {i: "" for i in PARCEIRO_IDS}
+    if not PARCEIROS_FILE.exists():
+        return nomes
+    try:
+        dados = json.loads(PARCEIROS_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return nomes
+    if not isinstance(dados, dict):
+        return nomes
+    for i in PARCEIRO_IDS:
+        valor = dados.get(i, "")
+        nomes[i] = limpar_nome_parceiro(valor if isinstance(valor, str) else "")
+    return nomes
+
+
+def gravar_parceiros(nomes):
+    limpos = {i: limpar_nome_parceiro(nomes.get(i, "")) for i in PARCEIRO_IDS}
+    tmp = PARCEIROS_FILE.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(limpos, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp, PARCEIROS_FILE)
+
+
+def lista_parceiros(nomes):
+    return [{"id": i, "nome": nomes[i]} for i in PARCEIRO_IDS]
 
 
 def novo_token():
@@ -315,7 +348,35 @@ class Handler(SimpleHTTPRequestHandler):
             return str(ROOT / "index.html")
         return convertido
 
+    def _alias_admin(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = normalizar_rota(parsed.path)
+        if not path:
+            return
+        qs = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
+        if path == "/api/admin-status":
+            inscricao_id = (qs.get("id") or [""])[0]
+            if not HEX_OK.match(inscricao_id):
+                inscricao_id = "x"
+            self.path = "/api/admin/inscricoes/%s/status" % inscricao_id
+            return
+        if path == "/api/admin-comprovante":
+            inscricao_id = (qs.get("id") or [""])[0]
+            if not HEX_OK.match(inscricao_id):
+                inscricao_id = "x"
+            self.path = "/api/admin/comprovante/%s" % inscricao_id
+            return
+        mapa = {
+            "/api/admin-login": "/api/admin/login",
+            "/api/admin-logout": "/api/admin/logout",
+            "/api/admin-inscricoes": "/api/admin/inscricoes",
+            "/api/admin-parceiros": "/api/admin/parceiros",
+        }
+        if path in mapa:
+            self.path = mapa[path]
+
     def do_GET(self):
+        self._alias_admin()
         if not self._host_ok():
             return self._texto(403, "Host inválido")
         parsed = urllib.parse.urlparse(self.path)
@@ -363,6 +424,11 @@ class Handler(SimpleHTTPRequestHandler):
                     return self._json(401, {"ok": False, "erro": "Não autorizado"})
                 return self._json(200, {"ok": True, "inscricoes": list(reversed(ler_inscricoes()))})
 
+            if path == "/api/admin/parceiros":
+                if not self._admin_ok():
+                    return self._json(401, {"ok": False, "erro": "Não autorizado"})
+                return self._json(200, {"ok": True, "parceiros": lista_parceiros(ler_parceiros())})
+
             if path.startswith("/api/admin/comprovante/"):
                 if not self._admin_ok():
                     return self._json(401, {"ok": False, "erro": "Não autorizado"})
@@ -409,6 +475,7 @@ class Handler(SimpleHTTPRequestHandler):
         return SimpleHTTPRequestHandler.do_GET(self)
 
     def do_POST(self):
+        self._alias_admin()
         if not self._host_ok() or not self._origem_ok():
             return self._texto(403, "Origem inválida")
         parsed = urllib.parse.urlparse(self.path)
@@ -490,6 +557,27 @@ class Handler(SimpleHTTPRequestHandler):
             gravar_inscricoes(lista)
             return self._json(200, {"ok": True})
 
+        if path == "/api/admin/parceiros":
+            if not self._admin_ok():
+                return self._json(401, {"ok": False, "erro": "Não autorizado"})
+            bruto = self.rfile.read(length)
+            try:
+                dados = json.loads(bruto.decode("utf-8"))
+            except json.JSONDecodeError:
+                return self._json(400, {"ok": False, "erro": "JSON inválido"})
+            recebidos = dados.get("nomes")
+            if not isinstance(recebidos, dict):
+                return self._json(400, {"ok": False, "erro": "Nomes inválidos"})
+            atual = ler_parceiros()
+            for i in PARCEIRO_IDS:
+                if i not in recebidos:
+                    continue
+                if not isinstance(recebidos[i], str):
+                    return self._json(400, {"ok": False, "erro": "Nome inválido"})
+                atual[i] = limpar_nome_parceiro(recebidos[i])
+            gravar_parceiros(atual)
+            return self._json(200, {"ok": True, "parceiros": lista_parceiros(atual)})
+
         if path == "/api/inscricoes":
             if not self._rate("insc:" + self._ip(), 20, 60):
                 return self._json(429, {"ok": False, "erro": "Muitas tentativas"})
@@ -512,6 +600,9 @@ class Handler(SimpleHTTPRequestHandler):
             indicacao = (campo("indicacao") or "Ninguém / não informado")[:80]
             modalidade_id = campo("modalidade_id")
             token = campo("pix_token")
+            parceiro_id = campo("parceiro")
+            if parceiro_id and parceiro_id not in PARCEIRO_IDS:
+                return self._json(400, {"ok": False, "erro": "Parceiro inválido"})
             origem = campo("origem")
             if origem not in ("pix", "cartao"):
                 origem = "pix"
@@ -552,6 +643,7 @@ class Handler(SimpleHTTPRequestHandler):
                 "nome": nome,
                 "whatsapp": whatsapp,
                 "indicacao": indicacao,
+                "parceiro_id": parceiro_id,
                 "modalidade_id": ingresso["id"],
                 "modalidade": ingresso["nome"],
                 "valor": ingresso["valor"],

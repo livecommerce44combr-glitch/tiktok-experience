@@ -52,7 +52,26 @@
     .btn--pink { background: var(--pink); }
     .erro { color: #c00; font-size: .85rem; min-height: 1.2em; }
     .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
-    .toolbar input { max-width: 280px; }
+    .toolbar input, .toolbar select { max-width: 280px; }
+    .parceiro-row {
+      display: grid; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line);
+    }
+    .parceiro-row:last-child { border-bottom: 0; }
+    .parceiro-row strong { font-size: .82rem; }
+    .parceiro-row input[readonly] { background: #faf9f7; color: #333; font-size: .82rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .chip {
+      background: #fff; color: #111; border: 1px solid var(--line);
+      min-height: 40px; font-size: .82rem;
+    }
+    .chip.is-on { background: #111; color: #fff; }
+    .card + .card { margin-top: 16px; }
+    @media (min-width: 800px) {
+      .parceiro-row {
+        grid-template-columns: 96px minmax(150px, 1fr) minmax(240px, 1.6fr) auto;
+        align-items: center;
+      }
+    }
     .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
     .stat {
       padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: #faf9f7;
@@ -105,7 +124,17 @@
           <button type="button" class="btn--ghost" id="btn-sair">Sair</button>
         </div>
       </header>
+      <section class="card">
+        <h2 style="margin:0 0 6px;font-size:1.05rem;">Links de afiliação</h2>
+        <p style="color:#6b6b6b;margin:0 0 4px;">Cinco links fixos. O nome de cada parceiro aparece na lista de cadastros. Quem entra pelo site, sem link, fica na página principal.</p>
+        <div id="parceiros-lista"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:8px;">
+          <p class="erro" id="parceiros-msg" style="margin:0;"></p>
+          <button type="button" class="btn--pink" id="btn-salvar-parceiros">Salvar nomes</button>
+        </div>
+      </section>
       <div class="card">
+        <div class="chips" id="origens"></div>
         <div class="stats">
           <div class="stat"><b id="total">0</b><span>Inscrições</span></div>
           <div class="stat"><b id="total-pendente">0</b><span>Pendentes</span></div>
@@ -113,6 +142,10 @@
         </div>
         <div class="toolbar">
           <input type="search" id="busca" placeholder="Buscar nome, WhatsApp ou ingresso" />
+          <select id="filtro-origem">
+            <option value="todas">Todas as origens</option>
+            <option value="principal">Página principal</option>
+          </select>
         </div>
         <div id="lista"></div>
       </div>
@@ -125,6 +158,32 @@
     const listaEl = document.getElementById("lista");
     const busca = document.getElementById("busca");
     let inscricoes = [];
+    let parceiros = ["1", "2", "3", "4", "5"].map((id) => ({ id, nome: "" }));
+    let filtroOrigem = "todas";
+    let parceirosProntos = false;
+
+    function listaParceiros() {
+      return ["1", "2", "3", "4", "5"].map((id) => {
+        const atual = parceiros.find((p) => String(p.id) === id);
+        return { id, nome: atual && atual.nome ? String(atual.nome) : "" };
+      });
+    }
+
+    function origemId(item) {
+      const id = String((item && item.parceiro_id) || "");
+      return /^[1-5]$/.test(id) ? id : "";
+    }
+
+    function nomeOrigem(item) {
+      const id = origemId(item);
+      if (!id) return "Página principal";
+      const nome = (listaParceiros().find((p) => p.id === id).nome || "").trim();
+      return nome || ("Parceiro " + id);
+    }
+
+    function linkParceiro(id) {
+      return location.origin + "/?p=" + id;
+    }
 
     function mostrarPainel(mostrar) {
       loginTela.classList.toggle("hidden", mostrar);
@@ -151,14 +210,80 @@
       }
       inscricoes = dados.inscricoes || [];
       mostrarPainel(true);
+      if (!parceirosProntos) {
+        await carregarParceiros();
+        parceirosProntos = true;
+      }
       render();
+    }
+
+    async function carregarParceiros() {
+      const res = await fetch("/api/admin-parceiros", { credentials: "same-origin" });
+      if (res.status === 401) return;
+      const dados = await lerJson(res);
+      if (res.ok && Array.isArray(dados.parceiros)) parceiros = dados.parceiros;
+      renderParceiros();
+    }
+
+    function renderParceiros() {
+      const lista = listaParceiros();
+      document.getElementById("parceiros-lista").innerHTML = lista.map((p) => `
+        <div class="parceiro-row">
+          <strong>Parceiro ${p.id}</strong>
+          <input type="text" maxlength="60" data-parceiro-nome="${p.id}" value="${esc(p.nome)}" placeholder="Nome do parceiro" />
+          <input type="text" readonly value="${esc(linkParceiro(p.id))}" aria-label="Link do parceiro ${p.id}" />
+          <button type="button" class="btn--ghost" data-copiar="${p.id}">Copiar link</button>
+        </div>
+      `).join("");
+      document.querySelectorAll("[data-copiar]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-copiar");
+          const link = linkParceiro(id);
+          let ok = false;
+          try {
+            await navigator.clipboard.writeText(link);
+            ok = true;
+          } catch (_) {}
+          const msg = document.getElementById("parceiros-msg");
+          msg.style.color = ok ? "#0d6b3c" : "#c00";
+          msg.textContent = ok ? "Link do parceiro " + id + " copiado." : "Não foi possível copiar. Selecione o link.";
+        });
+      });
+      const filtro = document.getElementById("filtro-origem");
+      const atual = filtro.value || filtroOrigem;
+      filtro.innerHTML = [
+        '<option value="todas">Todas as origens</option>',
+        '<option value="principal">Página principal</option>',
+        ...lista.map((p) => `<option value="${p.id}">${esc((p.nome || "").trim() || ("Parceiro " + p.id))}</option>`)
+      ].join("");
+      filtro.value = [...filtro.options].some((op) => op.value === atual) ? atual : "todas";
     }
 
     function render() {
       const q = busca.value.trim().toLowerCase();
+      const origem = document.getElementById("filtro-origem").value || "todas";
+      filtroOrigem = origem;
       const filtradas = inscricoes.filter((item) => {
-        const blob = [item.nome, item.whatsapp, item.modalidade, item.indicacao, item.valor].join(" ").toLowerCase();
-        return !q || blob.includes(q);
+        const blob = [item.nome, item.whatsapp, item.modalidade, item.indicacao, item.valor, nomeOrigem(item)].join(" ").toLowerCase();
+        if (q && !blob.includes(q)) return false;
+        if (origem === "principal") return origemId(item) === "";
+        if (origem !== "todas") return origemId(item) === origem;
+        return true;
+      });
+      const chips = [{ id: "todas", nome: "Todas", total: inscricoes.length }, { id: "principal", nome: "Página principal", total: inscricoes.filter((i) => origemId(i) === "").length }]
+        .concat(listaParceiros().map((p) => ({
+          id: p.id,
+          nome: (p.nome || "").trim() || ("Parceiro " + p.id),
+          total: inscricoes.filter((i) => origemId(i) === p.id).length
+        })));
+      document.getElementById("origens").innerHTML = chips.map((c) =>
+        `<button type="button" class="chip${origem === c.id ? " is-on" : ""}" data-origem="${c.id}">${esc(c.nome)} · ${c.total}</button>`
+      ).join("");
+      document.querySelectorAll("[data-origem]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.getElementById("filtro-origem").value = btn.getAttribute("data-origem");
+          render();
+        });
       });
       document.getElementById("total").textContent = String(inscricoes.length);
       document.getElementById("total-pendente").textContent = String(inscricoes.filter((i) => i.status === "pendente").length);
@@ -174,6 +299,7 @@
             <th>Nome</th>
             <th>WhatsApp</th>
             <th>Indicação</th>
+            <th>Origem</th>
             <th>Ingresso</th>
             <th>Status</th>
             <th>Comprovante</th>
@@ -186,6 +312,7 @@
               <td><b>${esc(item.nome)}</b></td>
               <td>${esc(item.whatsapp)}</td>
               <td>${esc(item.indicacao || "—")}</td>
+              <td>${esc(nomeOrigem(item))}</td>
               <td>${esc(item.modalidade || "")}<br><small>${esc(item.valor || "")}</small></td>
               <td>
                 <span class="pill pill--${item.status === "confirmado" ? "confirmado" : "pendente"}">${item.status === "confirmado" ? "Confirmado" : "Pendente"}</span>
@@ -247,16 +374,46 @@
     document.getElementById("btn-sair").addEventListener("click", async () => {
       await fetch("/api/admin-logout", { method: "POST", credentials: "same-origin" });
       inscricoes = [];
+      parceirosProntos = false;
       mostrarPainel(false);
+    });
+
+    document.getElementById("filtro-origem").addEventListener("change", render);
+
+    document.getElementById("btn-salvar-parceiros").addEventListener("click", async () => {
+      const msg = document.getElementById("parceiros-msg");
+      msg.style.color = "#6b6b6b";
+      msg.textContent = "Salvando…";
+      const nomes = {};
+      document.querySelectorAll("[data-parceiro-nome]").forEach((input) => {
+        nomes[input.getAttribute("data-parceiro-nome")] = input.value;
+      });
+      const res = await fetch("/api/admin-parceiros", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nomes })
+      });
+      const dados = await lerJson(res);
+      if (!res.ok) {
+        msg.style.color = "#c00";
+        msg.textContent = dados.erro || "Não foi possível salvar.";
+        return;
+      }
+      parceiros = dados.parceiros || parceiros;
+      renderParceiros();
+      render();
+      msg.style.color = "#0d6b3c";
+      msg.textContent = "Nomes salvos.";
     });
 
     busca.addEventListener("input", render);
 
     document.getElementById("btn-csv").addEventListener("click", () => {
-      const linhas = [["Data", "Nome", "WhatsApp", "Indicacao", "Modalidade", "Valor", "Status", "Comprovante"]];
+      const linhas = [["Data", "Nome", "WhatsApp", "Indicacao", "Origem", "Modalidade", "Valor", "Status", "Comprovante"]];
       inscricoes.forEach((item) => {
         linhas.push([
-          item.criado_em, item.nome, item.whatsapp, item.indicacao,
+          item.criado_em, item.nome, item.whatsapp, item.indicacao, nomeOrigem(item),
           item.modalidade, item.valor, item.status,
           item.comprovante_nome_original || ""
         ]);

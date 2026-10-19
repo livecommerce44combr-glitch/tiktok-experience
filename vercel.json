@@ -5,6 +5,7 @@
     { "source": "/api/admin/login", "destination": "/api/admin-login" },
     { "source": "/api/admin/logout", "destination": "/api/admin-logout" },
     { "source": "/api/admin/inscricoes", "destination": "/api/admin-inscricoes" },
+    { "source": "/api/admin/parceiros", "destination": "/api/admin-parceiros" },
     { "source": "/api/admin/inscricoes/:id/status", "destination": "/api/admin-status?id=:id" },
     { "source": "/api/admin/comprovante/:id", "destination": "/api/admin-comprovante?id=:id" },
     { "source": "/inscricao", "destination": "/index.html" },

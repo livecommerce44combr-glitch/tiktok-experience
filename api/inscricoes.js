@@ -72,6 +72,10 @@ module.exports = async (req, res) => {
   const nome = campo("nome").slice(0, 120);
   const whatsapp = campo("whatsapp").slice(0, 20);
   const indicacao = (campo("indicacao") || "Ninguém / não informado").slice(0, 80);
+  const parceiroId = campo("parceiro");
+  if (parceiroId && !/^[1-5]$/.test(parceiroId)) {
+    return json(res, 400, { ok: false, erro: "Parceiro inválido" });
+  }
   const modalidadeId = campo("modalidade_id");
   const token = campo("pix_token");
   let origem = campo("origem");
@@ -114,6 +118,7 @@ module.exports = async (req, res) => {
     nome,
     whatsapp,
     indicacao,
+    parceiro_id: parceiroId,
     modalidade_id: ingresso.id,
     modalidade: ingresso.nome,
     valor: ingresso.valor,

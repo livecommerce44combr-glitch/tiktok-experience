@@ -587,7 +587,7 @@
       <div class="pills">
         <span class="pill">Presencial</span>
         <span class="pill pill--hot">Vagas limitadas</span>
-        <span class="pill pill--soft">1º lote · R$ 29,90</span>
+        <span class="pill pill--soft">1º lote · R$ 49,90</span>
       </div>
 
       <p class="kicker">Inscrição</p>
@@ -650,7 +650,7 @@
               <h3>1º lote</h3>
               <p>Acesso completo ao TikTok Experience Caldas Novas, no valor promocional de abertura.</p>
               <div class="ticket-btns">
-                <button type="button" data-ticket="primeiro-lote"><span>Ingresso</span><strong>R$ 29,90</strong></button>
+                <button type="button" data-ticket="primeiro-lote"><span>Ingresso</span><strong>R$ 49,90</strong></button>
               </div>
             </article>
             <article>
@@ -679,7 +679,7 @@
           </details>
           <details>
             <summary>Quanto custa o ingresso?</summary>
-            <p>O 1º lote está R$ 29,90. O 2º lote será liberado somente quando o primeiro esgotar.</p>
+            <p>O 1º lote está R$ 49,90. O 2º lote será liberado somente quando o primeiro esgotar.</p>
           </details>
         </div>
       </div>
@@ -797,6 +797,8 @@
     let qrSrcAtual = "";
     let protegendoPix = false;
     const EVENTO_INICIO = new Date("2026-11-11T09:00:00-03:00");
+    const parceiroBusca = new URLSearchParams(location.search).get("p") || "";
+    const parceiroId = /^[1-5]$/.test(parceiroBusca) ? parceiroBusca : "";
     const MODALIDADES = [];
 
     const form = document.getElementById("form-inscricao");
@@ -937,6 +939,7 @@
       body.append("nome", d.nome);
       body.append("whatsapp", d.whatsapp);
       body.append("indicacao", d.indicacao);
+      if (parceiroId) body.append("parceiro", parceiroId);
       body.append("modalidade_id", m.id);
       body.append("pix_token", pixTokenAtual);
       body.append("origem", origem);
