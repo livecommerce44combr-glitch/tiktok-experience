@@ -220,6 +220,7 @@
       font-size: .82rem;
       font-weight: 800;
       cursor: pointer;
+      text-decoration: none;
     }
 
     .countdown {
@@ -595,14 +596,14 @@
 
       <div class="place">
         <div class="place__visual">
-          <img src="/banner-local-shopping-gallo.jpg?v=20261017" alt="TikTok Experience Caldas Novas — local em breve. Dúvidas e inscrições no WhatsApp (62) 98120-1160." />
+          <img src="/banner-local-palladium.jpg?v=20261019" alt="Local do evento: Palladium, R. B21, QD 26, LT 14, Itanhangá, Caldas Novas." />
         </div>
         <div class="place__copy">
-          <p class="place__eyebrow">Presencial em Caldas Novas</p>
-          <h2>Local em breve</h2>
-          <p class="place__pin">O endereço será anunciado em breve</p>
-          <p class="place__addr">Dúvidas e inscrições no WhatsApp</p>
-          <button type="button" class="place__cta" data-wpp="duvidas">Falar no WhatsApp</button>
+          <p class="place__eyebrow">Local do evento</p>
+          <h2>Palladium</h2>
+          <p class="place__pin">R. B21, QD 26, LT 14</p>
+          <p class="place__addr">Itanhangá, Caldas Novas – GO</p>
+          <a class="place__cta" href="https://www.google.com/maps/search/?api=1&amp;query=Palladium%20R.%20B21%20QD%2026%20LT%2014%20Itanhang%C3%A1%20Caldas%20Novas" target="_blank" rel="noopener noreferrer">Como chegar</a>
         </div>
       </div>
 
@@ -613,7 +614,7 @@
       <div class="mini-facts">
         <div>📅 11 de novembro</div>
         <div>⏰ 9h às 16h</div>
-        <div>📍 Local em breve · Caldas Novas/GO</div>
+        <div>📍 Palladium · Caldas Novas/GO</div>
       </div>
 
       <button class="toggle-more" type="button" id="btn-mais" aria-expanded="false">Ver mais</button>
@@ -675,7 +676,7 @@
           </details>
           <details>
             <summary>O evento é presencial?</summary>
-            <p>Sim. O encontro é presencial em Caldas Novas. O local será anunciado em breve.</p>
+            <p>Sim. O encontro é presencial no Palladium, na R. B21, QD 26, LT 14, Itanhangá, Caldas Novas.</p>
           </details>
           <details>
             <summary>Quanto custa o ingresso?</summary>
@@ -913,7 +914,7 @@
         if (whatsappOficial && n !== whatsappOficial) return false;
         whatsappOficial = n;
       }
-      if (chave === "arcano.com.br@gmail.com") {
+      if (chave === "arcanodigital.com.br@gmail.com") {
         if (chavePixOficial && chave !== chavePixOficial) return false;
         chavePixOficial = chave;
       }
@@ -977,7 +978,7 @@
         if (
           dados.valor !== m.valor ||
           dados.chave !== chavePixOficial ||
-          chavePixOficial !== "arcano.com.br@gmail.com" ||
+          chavePixOficial !== "arcanodigital.com.br@gmail.com" ||
           wpp !== numeroWhatsAppOficial() ||
           !payload.includes(chavePixOficial) ||
           !payload.includes(esperado) ||
@@ -1042,7 +1043,7 @@
       const dados = await res.json();
       if (!dados.ok || !Array.isArray(dados.ingressos)) throw new Error("catálogo");
       if (!guardarContato(dados)) throw new Error("contato");
-      if (!numeroWhatsAppOficial() || chavePixOficial !== "arcano.com.br@gmail.com") throw new Error("contato");
+      if (!numeroWhatsAppOficial() || chavePixOficial !== "arcanodigital.com.br@gmail.com") throw new Error("contato");
       MODALIDADES.splice(0, MODALIDADES.length, ...dados.ingressos.map((item) => Object.freeze(item)));
       preencherSelects();
       selectForm.setAttribute("autocomplete", "off");

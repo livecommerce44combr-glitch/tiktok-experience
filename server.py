@@ -6,7 +6,7 @@
 # REVISAR ANTES DE PUBLICAR
 # ============================================================
 PORTA = 8766
-CHAVE_PIX = "arcano.com.br@gmail.com"
+CHAVE_PIX = "arcanodigital.com.br@gmail.com"
 WHATSAPP_NUMERO = "5562981201160"
 PIX_RECEBEDOR = "TIKTOK EXPERIENCE CN"
 PIX_CIDADE = "GOIANIA"
