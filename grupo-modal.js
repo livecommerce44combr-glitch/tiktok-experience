@@ -1,6 +1,16 @@
 "use strict";
 
 (function () {
+  try {
+    if ((new URLSearchParams(location.search).get("p") || "") === "1") {
+      var modalMarla = document.getElementById("modal-grupo-whatsapp");
+      var ancoraMarla = document.getElementById("grupo-modal-off");
+      if (modalMarla) modalMarla.remove();
+      if (ancoraMarla) ancoraMarla.remove();
+      return;
+    }
+  } catch (e) {}
+
   var ATRASO_MS = 5000;
   var HASH_FECHAR = "#grupo-modal-off";
   var modal = document.getElementById("modal-grupo-whatsapp");

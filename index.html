@@ -778,7 +778,7 @@
       <a
         class="grupo-modal__cta"
         id="btn-entrar-grupo"
-        href="https://chat.whatsapp.com/C3Mw9onIMotIwoxRwNb1Np?s=cl&p=i&mlu=0&fbclid=PAcGRvZgRleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwyNTYyODEwNDA1NTgAAaddzuc5hyagGDmiGHmDxqGpYkvppv7kw2REQx8w_r-yXxKPSpJWRTk39cKx2g_aem_9AN2wQIq6L0tLBQQVtzApQ"
+        href="https://chat.whatsapp.com/LrGDRu12ot8C1QL9NJTKix?s=cl&amp;p=i&amp;mlu=4&amp;ilr=4"
         target="_blank"
         rel="noopener noreferrer"
       ><span class="grupo-modal__shine" aria-hidden="true"></span>Entrar no grupo agora</a>
@@ -800,6 +800,7 @@
     const EVENTO_INICIO = new Date("2026-11-11T09:00:00-03:00");
     const parceiroBusca = new URLSearchParams(location.search).get("p") || "";
     const parceiroId = /^[1-5]$/.test(parceiroBusca) ? parceiroBusca : "";
+    const WHATSAPP_MARLA = "5564992417978";
     const MODALIDADES = [];
 
     const form = document.getElementById("form-inscricao");
@@ -878,6 +879,10 @@
       const n = String(whatsappOficial || "").replace(/\D/g, "");
       return /^\d{12,13}$/.test(n) ? n : "";
     }
+    function numeroWhatsAppDestino() {
+      if (parceiroId === "1") return WHATSAPP_MARLA;
+      return numeroWhatsAppOficial();
+    }
     function formatarWhatsAppOficial(n) {
       const d = String(n || "").replace(/\D/g, "");
       if (d.length === 13 && d.startsWith("55")) {
@@ -902,7 +907,7 @@
       ].join("\n");
     }
     function abrirWhatsAppOficial(tipo) {
-      const n = numeroWhatsAppOficial();
+      const n = numeroWhatsAppDestino();
       if (!n) return false;
       window.open(`https://wa.me/${n}?text=${encodeURIComponent(mensagemWhatsApp(tipo))}`, "_blank", "noopener,noreferrer");
       return true;
@@ -918,7 +923,7 @@
         if (chavePixOficial && chave !== chavePixOficial) return false;
         chavePixOficial = chave;
       }
-      if (wppVisivel && whatsappOficial) wppVisivel.textContent = formatarWhatsAppOficial(whatsappOficial);
+      if (wppVisivel && numeroWhatsAppDestino()) wppVisivel.textContent = formatarWhatsAppOficial(numeroWhatsAppDestino());
       return true;
     }
     function pintarPixTravado() {
@@ -1095,7 +1100,7 @@
         return;
       }
       await atualizarPix();
-      if (!pixTokenAtual || !numeroWhatsAppOficial()) return;
+      if (!pixTokenAtual || !numeroWhatsAppDestino()) return;
       await salvarInscricao("pix");
       const file = comprovante.files[0];
       if (file && navigator.canShare && navigator.canShare({ files: [file] })) {

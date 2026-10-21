@@ -109,17 +109,18 @@ def limpar_nome_parceiro(nome):
 
 def ler_parceiros():
     nomes = {i: "" for i in PARCEIRO_IDS}
-    if not PARCEIROS_FILE.exists():
-        return nomes
-    try:
-        dados = json.loads(PARCEIROS_FILE.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return nomes
-    if not isinstance(dados, dict):
-        return nomes
-    for i in PARCEIRO_IDS:
-        valor = dados.get(i, "")
-        nomes[i] = limpar_nome_parceiro(valor if isinstance(valor, str) else "")
+    dados = None
+    if PARCEIROS_FILE.exists():
+        try:
+            dados = json.loads(PARCEIROS_FILE.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            dados = None
+    if isinstance(dados, dict):
+        for i in PARCEIRO_IDS:
+            valor = dados.get(i, "")
+            nomes[i] = limpar_nome_parceiro(valor if isinstance(valor, str) else "")
+    if not nomes.get("1"):
+        nomes["1"] = "marladammas"
     return nomes
 
 
