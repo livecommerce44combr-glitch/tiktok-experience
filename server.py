@@ -22,6 +22,7 @@ import os
 import posixpath
 import re
 import secrets
+import threading
 import time
 import urllib.parse
 from collections import defaultdict, deque
@@ -39,7 +40,20 @@ WHATSAPP_NUMERO = "".join(ch for ch in os.environ.get("WHATSAPP_NUMERO", WHATSAP
 EXT_BLOQUEADAS = {".py", ".json", ".secret", ".md", ".gitignore"}
 ARQUIVOS_BLOQUEADOS = {"inscricoes.json", "parceiros.json", ".admin_secret", ".admin_password", "server.py", ".gitignore"}
 PARCEIRO_IDS = ("1", "2", "3", "4", "5")
-TIPOS_OK = {".jpg", ".jpeg", ".png", ".webp", ".pdf"}
+TIPOS_OK = {".jpg", ".jpeg", ".png", ".webp", ".pdf", ".heic", ".heif"}
+MIME_EXT = {
+    "image/jpeg": ".jpg",
+    "image/jpg": ".jpg",
+    "image/pjpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+    "image/heic": ".heic",
+    "image/heif": ".heif",
+    "image/heic-sequence": ".heic",
+    "image/heif-sequence": ".heif",
+    "application/pdf": ".pdf",
+}
+INSCRICOES_LOCK = threading.Lock()
 MAX_ARQUIVO = 5 * 1024 * 1024
 PIX_TOKEN_TTL = 30 * 60
 ID_OK = re.compile(r"^[a-z0-9-]{3,40}$")
@@ -101,6 +115,36 @@ def gravar_inscricoes(lista):
     tmp = DATA_FILE.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(lista, ensure_ascii=False, indent=2), encoding="utf-8")
     os.replace(tmp, DATA_FILE)
+
+
+def extensao_por_assinatura(conteudo):
+    if conteudo.startswith(b"\xff\xd8\xff"):
+        return ".jpg"
+    if conteudo.startswith(b"\x89PNG"):
+        return ".png"
+    if conteudo.startswith(b"%PDF-"):
+        return ".pdf"
+    if conteudo.startswith(b"RIFF") and conteudo[8:12] == b"WEBP":
+        return ".webp"
+    if len(conteudo) >= 12 and conteudo[4:8] == b"ftyp":
+        marca = conteudo[8:12].lower()
+        if marca.startswith(b"hei") or marca in (b"mif1", b"msf1"):
+            return ".heic"
+    return ""
+
+
+def extensao_comprovante(nome, mime, conteudo):
+    original = os.path.basename(nome or "")
+    ext = extensao_por_assinatura(conteudo)
+    if ext not in TIPOS_OK:
+        ext = Path(original).suffix.lower()
+    if ext not in TIPOS_OK:
+        ext = MIME_EXT.get((mime or "").split(";")[0].strip().lower(), "")
+    if ext not in TIPOS_OK:
+        return "", original
+    if not original:
+        original = "comprovante" + ext
+    return ext, original
 
 
 def limpar_nome_parceiro(nome):
@@ -445,7 +489,7 @@ class Handler(SimpleHTTPRequestHandler):
                     return self._texto(404, "Arquivo não encontrado")
                 data = destino.read_bytes()
                 ext = destino.suffix.lower()
-                tipos = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".pdf": "application/pdf"}
+                tipos = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".pdf": "application/pdf", ".heic": "image/heic", ".heif": "image/heif"}
                 self.send_response(200)
                 self.send_header("Content-Type", tipos.get(ext, "application/octet-stream"))
                 self.send_header("Content-Length", str(len(data)))
@@ -546,16 +590,17 @@ class Handler(SimpleHTTPRequestHandler):
             status = dados.get("status")
             if status not in ("pendente", "confirmado"):
                 return self._json(400, {"ok": False, "erro": "Status inválido"})
-            lista = ler_inscricoes()
-            achou = False
-            for item in lista:
-                if item.get("id") == inscricao_id:
-                    item["status"] = status
-                    achou = True
-                    break
-            if not achou:
-                return self._json(404, {"ok": False, "erro": "Inscrição não encontrada"})
-            gravar_inscricoes(lista)
+            with INSCRICOES_LOCK:
+                lista = ler_inscricoes()
+                achou = False
+                for item in lista:
+                    if item.get("id") == inscricao_id:
+                        item["status"] = status
+                        achou = True
+                        break
+                if not achou:
+                    return self._json(404, {"ok": False, "erro": "Inscrição não encontrada"})
+                gravar_inscricoes(lista)
             return self._json(200, {"ok": True})
 
         if path == "/api/admin/parceiros":
@@ -621,22 +666,32 @@ class Handler(SimpleHTTPRequestHandler):
             if len(digits) < 10 or len(digits) > 11:
                 return self._json(400, {"ok": False, "erro": "Informe o WhatsApp com DDD"})
 
+            inscricao_id = secrets.token_hex(8)
             comprovante_nome = ""
+            nome_original = ""
             arquivo = form["comprovante"] if "comprovante" in form else None
-            if arquivo is not None and getattr(arquivo, "filename", None):
-                original = os.path.basename(arquivo.filename)
-                ext = Path(original).suffix.lower()
-                if ext not in TIPOS_OK:
-                    return self._json(400, {"ok": False, "erro": "Envie JPG, PNG, WEBP ou PDF"})
+            tem_arquivo = (
+                arquivo is not None
+                and not isinstance(arquivo, list)
+                and getattr(arquivo, "file", None) is not None
+                and (getattr(arquivo, "filename", None) or getattr(arquivo, "type", ""))
+            )
+            if tem_arquivo:
                 conteudo = arquivo.file.read()
+                if not conteudo:
+                    return self._json(400, {"ok": False, "erro": "Não foi possível ler o comprovante. Tente outra foto."})
                 if len(conteudo) > MAX_ARQUIVO:
                     return self._json(413, {"ok": False, "erro": "Comprovante acima de 5 MB"})
+                ext, nome_original = extensao_comprovante(
+                    getattr(arquivo, "filename", "") or "",
+                    getattr(arquivo, "type", "") or "",
+                    conteudo,
+                )
+                if not ext:
+                    return self._json(400, {"ok": False, "erro": "Envie uma foto (JPG, PNG, WEBP ou HEIC) ou PDF"})
                 UPLOADS.mkdir(exist_ok=True)
-                inscricao_id = secrets.token_hex(8)
                 comprovante_nome = "%s%s" % (inscricao_id, ext)
                 (UPLOADS / comprovante_nome).write_bytes(conteudo)
-            else:
-                inscricao_id = secrets.token_hex(8)
 
             item = {
                 "id": inscricao_id,
@@ -650,14 +705,15 @@ class Handler(SimpleHTTPRequestHandler):
                 "valor": ingresso["valor"],
                 "origem": origem,
                 "comprovante_arquivo": comprovante_nome,
-                "comprovante_nome_original": os.path.basename(getattr(arquivo, "filename", "") or ""),
+                "comprovante_nome_original": nome_original,
                 "status": "pendente",
             }
-            lista = ler_inscricoes()
-            lista.append(item)
-            gravar_inscricoes(lista)
+            with INSCRICOES_LOCK:
+                lista = ler_inscricoes()
+                lista.append(item)
+                gravar_inscricoes(lista)
             marcar_token_pix_usado(token, token.split(".", 1)[0])
-            return self._json(200, {"ok": True, "id": inscricao_id, "valor": ingresso["valor"]})
+            return self._json(200, {"ok": True, "id": inscricao_id, "valor": ingresso["valor"], "comprovante": bool(comprovante_nome)})
 
         return self._json(404, {"ok": False, "erro": "Rota não encontrada"})
 

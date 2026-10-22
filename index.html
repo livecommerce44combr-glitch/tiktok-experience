@@ -388,6 +388,10 @@
     }
     .receipt-box label b { color: var(--pink); }
     .receipt-box label small { color: var(--muted); font-size: .75rem; }
+    .receipt-msg { margin: 8px 0 0; font-size: .85rem; font-weight: 700; text-align: center; line-height: 1.35; }
+    .receipt-msg:empty { display: none; }
+    .receipt-msg.is-erro { color: #c00; }
+    .receipt-msg.is-ok { color: #0d6b3c; }
     .pix-actions { display: grid; gap: 10px; margin-top: 16px; }
     .alert {
       margin-top: 14px; padding: 14px 16px; border-radius: 10px;
@@ -739,8 +743,9 @@
           <input type="file" id="comprovante" accept="image/*,.pdf,application/pdf" />
           <label for="comprovante" id="label-comprovante">
             <b>Anexar comprovante</b>
-            <small>JPG, PNG, WEBP ou PDF</small>
+            <small>Foto, print ou PDF</small>
           </label>
+          <p id="comprovante-msg" class="receipt-msg" role="status"></p>
         </div>
         <div class="alert" role="status">Depois de pagar, anexe o comprovante e chame no WhatsApp para confirmar a inscrição.</div>
         <div class="pix-actions">
@@ -815,6 +820,10 @@
     const qrImg = document.getElementById("qr-img");
     const comprovante = document.getElementById("comprovante");
     const labelComprovante = document.getElementById("label-comprovante");
+    const msgComprovanteEl = document.getElementById("comprovante-msg");
+    let comprovantePronto = null;
+    let comprovanteErro = "";
+    let preparandoComprovante = null;
 
     function preencherSelects() {
       selectForm.innerHTML = MODALIDADES.map((m) => `<option value="${m.id}">${m.label}</option>`).join("");
@@ -935,11 +944,71 @@
       if (qrSrcAtual && qrImg.getAttribute("src") !== qrSrcAtual) qrImg.setAttribute("src", qrSrcAtual);
       protegendoPix = false;
     }
-    function salvarInscricao(origem) {
+    function escHtml(valor) {
+      return String(valor).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    }
+    function msgComprovante(texto, erro) {
+      msgComprovanteEl.textContent = texto || "";
+      msgComprovanteEl.classList.toggle("is-erro", Boolean(erro) && Boolean(texto));
+      msgComprovanteEl.classList.toggle("is-ok", Boolean(texto) && !erro);
+    }
+    function rotuloComprovante(titulo, detalhe) {
+      labelComprovante.innerHTML = `<b>${escHtml(titulo)}</b><small>${escHtml(detalhe)}</small>`;
+    }
+    function comprimirImagem(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const maxLado = 1800;
+          const escala = Math.min(1, maxLado / Math.max(img.width || 1, img.height || 1));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(img.width * escala));
+          canvas.height = Math.max(1, Math.round(img.height * escala));
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error("Não foi possível preparar a foto."));
+              return;
+            }
+            resolve(new File([blob], "comprovante.jpg", { type: "image/jpeg" }));
+          }, "image/jpeg", 0.82);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error("foto"));
+        };
+        img.src = url;
+      });
+    }
+    async function prepararComprovante(file) {
+      const limite = 4 * 1024 * 1024;
+      const nome = String(file.name || "").toLowerCase();
+      const tipo = String(file.type || "").toLowerCase();
+      if (tipo === "application/pdf" || nome.endsWith(".pdf")) {
+        if (file.size > limite) throw new Error("O PDF precisa ter menos de 4 MB.");
+        return file;
+      }
+      try {
+        const jpeg = await comprimirImagem(file);
+        if (jpeg.size > limite) throw new Error("Essa foto está grande demais. Envie um print da tela do banco.");
+        return jpeg;
+      } catch (err) {
+        if (err && /grande demais|menos de 4 MB/.test(err.message || "")) throw err;
+        if (file.size > limite) throw new Error("Essa foto está grande demais. Envie um print da tela do banco.");
+        if (tipo.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/.test(nome)) return file;
+        throw new Error("Envie uma foto ou um PDF.");
+      }
+    }
+    async function salvarInscricao(origem) {
       const m = modalidadeAtual();
       const d = dadosFormulario();
       if (!m || !pixTokenAtual || !pixTravado || pixTravado.id !== m.id) {
-        return Promise.resolve(null);
+        throw new Error("O Pix expirou. Recarregue a página e tente de novo.");
       }
       const body = new FormData();
       body.append("nome", d.nome);
@@ -949,9 +1018,24 @@
       body.append("modalidade_id", m.id);
       body.append("pix_token", pixTokenAtual);
       body.append("origem", origem);
-      const arquivo = comprovante.files[0];
-      if (arquivo) body.append("comprovante", arquivo, arquivo.name);
-      return fetch("/api/inscricoes", { method: "POST", body, credentials: "same-origin", cache: "no-store" }).catch(() => null);
+      const arquivo = comprovantePronto;
+      if (arquivo) body.append("comprovante", arquivo, arquivo.name || "comprovante.jpg");
+      let res;
+      try {
+        res = await fetch("/api/inscricoes", { method: "POST", body, credentials: "same-origin", cache: "no-store" });
+      } catch (_) {
+        throw new Error("Sem conexão. Tente enviar o comprovante de novo.");
+      }
+      let dados = {};
+      try { dados = await res.json(); } catch (_) {}
+      if (!res.ok || !dados.ok) {
+        if (res.status === 413) throw new Error("O comprovante ficou grande demais. Envie um print menor.");
+        throw new Error(dados.erro || "Não foi possível enviar a inscrição. Tente de novo.");
+      }
+      if (arquivo && !dados.comprovante) {
+        throw new Error("A inscrição não levou o comprovante. Tente enviar de novo.");
+      }
+      return dados;
     }
     async function atualizarPix() {
       const m = modalidadeAtual();
@@ -1070,11 +1154,30 @@
 
     comprovante.addEventListener("change", () => {
       const file = comprovante.files[0];
-      if (file) {
-        labelComprovante.innerHTML = `<b>Comprovante anexado</b><small>${file.name}</small>`;
-      } else {
-        labelComprovante.innerHTML = `<b>Anexar comprovante</b><small>JPG, PNG, WEBP ou PDF</small>`;
+      comprovantePronto = null;
+      comprovanteErro = "";
+      preparandoComprovante = null;
+      if (!file) {
+        rotuloComprovante("Anexar comprovante", "Foto, print ou PDF");
+        msgComprovante("");
+        atualizarResumo();
+        return;
       }
+      rotuloComprovante("Preparando comprovante…", file.name);
+      msgComprovante("");
+      const tarefa = prepararComprovante(file).then((pronto) => {
+        if (comprovante.files[0] !== file) return;
+        comprovantePronto = pronto;
+        rotuloComprovante("Comprovante anexado", file.name);
+        msgComprovante("Comprovante pronto para envio.");
+      }).catch((err) => {
+        if (comprovante.files[0] !== file) return;
+        comprovanteErro = (err && err.message) || "Não foi possível usar esse arquivo.";
+        comprovante.value = "";
+        rotuloComprovante("Anexar comprovante", "Foto, print ou PDF");
+        msgComprovante(comprovanteErro, true);
+      });
+      preparandoComprovante = tarefa;
       atualizarResumo();
     });
 
@@ -1095,15 +1198,46 @@
     btnPago.addEventListener("click", async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!validarFormulario()) {
-        form.scrollIntoView({ behavior: "smooth" });
-        return;
+      if (btnPago.disabled) return;
+      btnPago.disabled = true;
+      const textoBtn = btnPago.textContent;
+      let enviou = false;
+      try {
+        if (!validarFormulario()) {
+          form.scrollIntoView({ behavior: "smooth" });
+          return;
+        }
+        if (preparandoComprovante) {
+          msgComprovante("Aguarde, o comprovante ainda está sendo preparado.", true);
+          try { await preparandoComprovante; } catch (_) {}
+        }
+        if (comprovanteErro || (comprovante.files[0] && !comprovantePronto)) {
+          msgComprovante(comprovanteErro || "Não foi possível usar esse comprovante. Anexe outra foto.", true);
+          return;
+        }
+        btnPago.textContent = comprovantePronto ? "Enviando comprovante…" : "Enviando inscrição…";
+        msgComprovante("");
+        await atualizarPix();
+        if (!pixTokenAtual || !numeroWhatsAppDestino()) {
+          msgComprovante("Não foi possível confirmar o Pix. Recarregue a página e tente de novo.", true);
+          return;
+        }
+        await salvarInscricao("pix");
+        enviou = true;
+      } catch (err) {
+        msgComprovante((err && err.message) || "Não foi possível enviar. Tente de novo.", true);
+      } finally {
+        btnPago.disabled = false;
+        btnPago.textContent = textoBtn;
       }
-      await atualizarPix();
-      if (!pixTokenAtual || !numeroWhatsAppDestino()) return;
-      await salvarInscricao("pix");
-      const file = comprovante.files[0];
-      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      if (!enviou) return;
+      msgComprovante("Inscrição enviada. Abrindo o WhatsApp…");
+      const file = comprovantePronto;
+      let podeCompartilhar = false;
+      try {
+        podeCompartilhar = Boolean(file && navigator.canShare && navigator.canShare({ files: [file] }));
+      } catch (_) {}
+      if (podeCompartilhar) {
         try {
           await navigator.share({
             files: [file],

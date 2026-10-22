@@ -2,7 +2,7 @@
 
 const { adminOk } = require("../lib/auth");
 const { json, origemOk } = require("../lib/pix");
-const { lerInscricoes, gravarInscricoes } = require("../lib/store");
+const { lerInscricoes, gravarItem } = require("../lib/store");
 
 const HEX_OK = /^[a-f0-9]{16}$/;
 
@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
   if (!item) return json(res, 404, { ok: false, erro: "Inscrição não encontrada" });
   item.status = status;
   try {
-    await gravarInscricoes(lista);
+    await gravarItem(item);
   } catch (_) {
     return json(res, 503, { ok: false, erro: "Não foi possível salvar o status." });
   }
