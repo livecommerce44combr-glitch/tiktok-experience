@@ -260,6 +260,44 @@
     .about p { margin: 0 0 12px; }
     .mini-facts { margin: 16px 0 8px; color: #555; font-size: .9rem; }
     .mini-facts div { display: flex; gap: 8px; margin: 6px 0; }
+    .combo-banner {
+      margin: 18px 0 0;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      border: 2px solid var(--pink);
+      border-radius: 16px;
+      background: linear-gradient(160deg, #fff1f7, #fff);
+      box-shadow: 0 10px 28px rgba(225, 6, 122, .12);
+    }
+    .combo-banner__tag {
+      justify-self: start;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ff7a18, var(--pink-hot));
+      color: #fff;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .combo-banner strong {
+      display: block;
+      font-size: 1.2rem;
+      letter-spacing: -.02em;
+    }
+    .combo-banner p { margin: 4px 0 0; color: var(--muted); font-size: .9rem; }
+    .combo-banner button {
+      width: 100%;
+      min-height: 48px;
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(110deg, var(--pink-hot), var(--pink));
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .combo-banner button.is-on { background: #111; }
     .toggle-more {
       margin: 8px 0 22px; padding: 0; border: 0; background: none;
       color: var(--pink); font-weight: 700; cursor: pointer;
@@ -625,6 +663,15 @@
         <div>📍 Palladium · Caldas Novas/GO</div>
       </div>
 
+      <aside class="combo-banner" aria-label="Combo de ingressos">
+        <span class="combo-banner__tag">Combo</span>
+        <div>
+          <strong>2 ingressos por R$ 69,90</strong>
+          <p>Leve um acompanhante no 1º lote. Dois ingressos separados sairiam por R$ 99,80.</p>
+        </div>
+        <button type="button" id="btn-combo-destaque" data-ticket="combo-2">Quero o combo</button>
+      </aside>
+
       <button class="toggle-more" type="button" id="btn-mais" aria-expanded="false">Ver mais</button>
 
       <div class="extra" id="extra" hidden>
@@ -954,6 +1001,8 @@
         btn.classList.toggle("is-on", ativo);
         btn.setAttribute("aria-pressed", ativo ? "true" : "false");
       });
+      const destaque = document.getElementById("btn-combo-destaque");
+      if (destaque) destaque.textContent = id === "combo-2" ? "Combo selecionado" : "Quero o combo";
     }
     function pintarPixTravado() {
       if (!pixTravado) return;
