@@ -61,6 +61,7 @@ HEX_OK = re.compile(r"^[a-f0-9]{16}$")
 
 INGRESSOS = {
     "primeiro-lote": {"id": "primeiro-lote", "nome": "1º lote", "valor": "R$ 49,90", "valor_numero": "49.90", "label": "1º lote — R$ 49,90"},
+    "combo-2": {"id": "combo-2", "nome": "Combo 2 ingressos", "valor": "R$ 69,90", "valor_numero": "69.90", "label": "Combo 2 ingressos — R$ 69,90"},
 }
 
 GET_API = {"/api/pix", "/api/ingressos", "/api/admin/inscricoes"}

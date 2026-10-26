@@ -289,6 +289,10 @@
       opacity: .55;
       background: #f4f2ee;
     }
+    .ticket-btns button.is-on {
+      border-color: var(--pink);
+      box-shadow: 0 0 0 3px rgba(225, 6, 122, .12);
+    }
     .faq details { border-bottom: 1px solid var(--line); }
     .faq summary {
       cursor: pointer; padding: 14px 0;
@@ -659,6 +663,13 @@
               </div>
             </article>
             <article>
+              <h3>Combo</h3>
+              <p>Dois ingressos do 1º lote por R$ 69,90.</p>
+              <div class="ticket-btns">
+                <button type="button" data-ticket="combo-2"><span>2 ingressos</span><strong>R$ 69,90</strong></button>
+              </div>
+            </article>
+            <article>
               <h3>2º lote</h3>
               <p>Será liberado quando o 1º lote esgotar.</p>
               <div class="ticket-btns">
@@ -684,7 +695,7 @@
           </details>
           <details>
             <summary>Quanto custa o ingresso?</summary>
-            <p>O 1º lote está R$ 49,90. O 2º lote será liberado somente quando o primeiro esgotar.</p>
+            <p>O 1º lote está R$ 49,90. O combo leva 2 ingressos por R$ 69,90. O 2º lote será liberado somente quando o primeiro esgotar.</p>
           </details>
         </div>
       </div>
@@ -725,7 +736,7 @@
       <section class="pix-section" id="pix">
         <span class="step">Pagamento via Pix</span>
         <h2>Faça o Pix e envie o comprovante</h2>
-        <p>O QR Code e o Pix copia e cola já saem com o valor do 1º lote.</p>
+        <p id="pix-legenda">O QR Code e o Pix copia e cola acompanham o ingresso escolhido.</p>
         <div class="pix-value"><span>Valor do Pix</span><strong id="pix-valor">—</strong></div>
         <div class="pix-value"><span>Chave Pix (e-mail)</span><strong class="pix-email" id="pix-email">Carregando…</strong></div>
         <div class="resumo" id="resumo-inscricao"></div>
@@ -800,6 +811,7 @@
     let pixPayloadAtual = "";
     let pixTokenAtual = "";
     let pixTravado = null;
+    let pixPedido = 0;
     let qrSrcAtual = "";
     let protegendoPix = false;
     const EVENTO_INICIO = new Date("2026-11-11T09:00:00-03:00");
@@ -935,12 +947,21 @@
       if (wppVisivel && numeroWhatsAppDestino()) wppVisivel.textContent = formatarWhatsAppOficial(numeroWhatsAppDestino());
       return true;
     }
+    function marcarIngressoSelecionado() {
+      const id = (modalidadeAtual() || {}).id || "";
+      document.querySelectorAll("[data-ticket]").forEach((btn) => {
+        const ativo = btn.getAttribute("data-ticket") === id;
+        btn.classList.toggle("is-on", ativo);
+        btn.setAttribute("aria-pressed", ativo ? "true" : "false");
+      });
+    }
     function pintarPixTravado() {
       if (!pixTravado) return;
       protegendoPix = true;
       pixValor.textContent = pixTravado.valor;
       pixEmail.textContent = pixTravado.chave;
       pixChave.textContent = pixTravado.payload;
+      document.getElementById("pix-legenda").textContent = "O QR Code e o Pix copia e cola estão no valor de " + pixTravado.valor + ".";
       if (qrSrcAtual && qrImg.getAttribute("src") !== qrSrcAtual) qrImg.setAttribute("src", qrSrcAtual);
       protegendoPix = false;
     }
@@ -1038,17 +1059,21 @@
       return dados;
     }
     async function atualizarPix() {
+      const pedido = ++pixPedido;
       const m = modalidadeAtual();
       const d = dadosFormulario();
+      marcarIngressoSelecionado();
       pixValor.textContent = m ? m.valor : "—";
       pixChave.textContent = "Carregando Pix seguro…";
       pixPayloadAtual = "";
       pixTokenAtual = "";
       pixTravado = null;
+      qrSrcAtual = "";
       if (!m) return;
       try {
         const res = await fetch("/api/pix?modalidade=" + encodeURIComponent(m.id), { cache: "no-store", credentials: "same-origin" });
         const dados = await res.json();
+        if (pedido !== pixPedido) return;
         if (!res.ok || !dados.ok || !dados.payload || !dados.token) {
           pixChave.textContent = "Não foi possível gerar o Pix. Recarregue a página.";
           return;
@@ -1096,6 +1121,7 @@
         pintarPixTravado();
         resumo.innerHTML = `<div><b>Nome:</b> ${d.nome || "—"}</div><div><b>WhatsApp:</b> ${d.whatsapp || "—"}</div><div><b>Ingresso:</b> ${pixTravado.nome} · ${pixTravado.valor}</div>`;
       } catch (_) {
+        if (pedido !== pixPedido) return;
         pixChave.textContent = "Não foi possível gerar o Pix. Recarregue a página.";
       }
     }
@@ -1136,6 +1162,7 @@
       MODALIDADES.splice(0, MODALIDADES.length, ...dados.ingressos.map((item) => Object.freeze(item)));
       preencherSelects();
       selectForm.setAttribute("autocomplete", "off");
+      marcarIngressoSelecionado();
       await atualizarPix();
     }
 
@@ -1264,7 +1291,9 @@
 
     document.querySelectorAll("[data-ticket]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        selectForm.value = btn.getAttribute("data-ticket");
+        const id = btn.getAttribute("data-ticket");
+        if (![...selectForm.options].some((opcao) => opcao.value === id)) return;
+        selectForm.value = id;
         atualizarPix();
         document.getElementById("pix").scrollIntoView({ behavior: "smooth" });
       });
