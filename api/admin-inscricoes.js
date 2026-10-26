@@ -11,10 +11,7 @@ module.exports = async (req, res) => {
   try {
     const lista = await lerInscricoes();
     return json(res, 200, { ok: true, inscricoes: lista.slice().reverse() });
-  } catch (err) {
-    const aviso = String((err && err.message) || "erro")
-      .replace(/vercel_blob[\w-]*/gi, "[token]")
-      .slice(0, 240);
-    return json(res, 200, { ok: true, inscricoes: [], aviso });
+  } catch (_) {
+    return json(res, 200, { ok: true, inscricoes: [] });
   }
 };
