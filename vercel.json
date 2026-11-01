@@ -13,6 +13,7 @@
     { "source": "/evento", "destination": "/index.html" },
     { "source": "/live", "destination": "/index.html" },
     { "source": "/grupo", "destination": "/index.html" },
+    { "source": "/faby", "destination": "/index.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [

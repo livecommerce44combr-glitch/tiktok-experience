@@ -862,8 +862,9 @@
     let qrSrcAtual = "";
     let protegendoPix = false;
     const EVENTO_INICIO = new Date("2026-11-11T09:00:00-03:00");
+    const caminhoParceiro = (location.pathname.replace(/\/+$/, "") || "/").toLowerCase();
     const parceiroBusca = new URLSearchParams(location.search).get("p") || "";
-    const parceiroId = /^[1-5]$/.test(parceiroBusca) ? parceiroBusca : "";
+    const parceiroId = caminhoParceiro === "/faby" ? "4" : (/^[1-5]$/.test(parceiroBusca) ? parceiroBusca : "");
 
     function idVisitante() {
       const chave = "tiktok-visitante";
