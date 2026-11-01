@@ -2,10 +2,25 @@
 
 const { adminOk } = require("../lib/auth");
 const { json, origemOk } = require("../lib/pix");
-const { PARCEIRO_IDS, lerParceiros, gravarParceiros, nomeParceiroLimpo } = require("../lib/store");
+const { PARCEIRO_IDS, lerParceiros, gravarParceiros, nomeParceiroLimpo, lerEntradas } = require("../lib/store");
 
-function listaDe(nomes) {
-  return PARCEIRO_IDS.map((id) => ({ id, nome: nomes[id] || "" }));
+function numeroEntrada(valor) {
+  if (Array.isArray(valor)) return valor.length;
+  const n = Number(valor);
+  return Number.isInteger(n) && n >= 0 ? n : 0;
+}
+
+function listaDe(nomes, entradas) {
+  const contagem = entradas && typeof entradas === "object" ? entradas : {};
+  return PARCEIRO_IDS.map((id) => ({ id, nome: nomes[id] || "", entradas: numeroEntrada(contagem[id]) }));
+}
+
+async function entradasAtuais() {
+  try {
+    return await lerEntradas();
+  } catch (_) {
+    return {};
+  }
 }
 
 module.exports = async (req, res) => {
@@ -16,7 +31,12 @@ module.exports = async (req, res) => {
   if (!adminOk(req)) return json(res, 401, { ok: false, erro: "Não autorizado" });
 
   if (req.method === "GET") {
-    return json(res, 200, { ok: true, parceiros: listaDe(await lerParceiros()) });
+    const entradas = await entradasAtuais();
+    return json(res, 200, {
+      ok: true,
+      parceiros: listaDe(await lerParceiros(), entradas),
+      entradas_principal: numeroEntrada(entradas.principal),
+    });
   }
 
   const chunks = [];
@@ -44,5 +64,10 @@ module.exports = async (req, res) => {
   } catch (_) {
     return json(res, 503, { ok: false, erro: "Não foi possível salvar os parceiros." });
   }
-  return json(res, 200, { ok: true, parceiros: listaDe(atual) });
+  const entradas = await entradasAtuais();
+  return json(res, 200, {
+    ok: true,
+    parceiros: listaDe(atual, entradas),
+    entradas_principal: numeroEntrada(entradas.principal),
+  });
 };

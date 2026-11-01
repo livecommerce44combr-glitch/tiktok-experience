@@ -57,7 +57,8 @@
       display: grid; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line);
     }
     .parceiro-row:last-child { border-bottom: 0; }
-    .parceiro-row strong { font-size: .82rem; }
+    .parceiro-row strong { display: block; font-size: .82rem; }
+    .parceiro-row .entradas { color: var(--muted); font-size: .75rem; font-weight: 600; }
     .parceiro-row input[readonly] { background: #faf9f7; color: #333; font-size: .82rem; }
     .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     .chip {
@@ -68,7 +69,7 @@
     .card + .card { margin-top: 16px; }
     @media (min-width: 800px) {
       .parceiro-row {
-        grid-template-columns: 96px minmax(150px, 1fr) minmax(240px, 1.6fr) auto;
+        grid-template-columns: 150px minmax(150px, 1fr) minmax(220px, 1.6fr) auto;
         align-items: center;
       }
     }
@@ -126,7 +127,8 @@
       </header>
       <section class="card">
         <h2 style="margin:0 0 6px;font-size:1.05rem;">Links de afiliação</h2>
-        <p style="color:#6b6b6b;margin:0 0 4px;">Cinco links fixos. O nome de cada parceiro aparece na lista de cadastros. Quem entra pelo site, sem link, fica na página principal.</p>
+        <p style="color:#6b6b6b;margin:0 0 4px;">Cinco links fixos. O número em cada link é quantas pessoas diferentes abriram aquela página. Atualizar a página não conta de novo. Quem entra sem link fica na página principal.</p>
+        <p id="entrada-principal" style="margin:0 0 8px;font-weight:700;">Página principal · 0 pessoas</p>
         <div id="parceiros-lista"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:8px;">
           <p class="erro" id="parceiros-msg" style="margin:0;"></p>
@@ -158,14 +160,16 @@
     const listaEl = document.getElementById("lista");
     const busca = document.getElementById("busca");
     let inscricoes = [];
-    let parceiros = ["1", "2", "3", "4", "5"].map((id) => ({ id, nome: "" }));
+    let parceiros = ["1", "2", "3", "4", "5"].map((id) => ({ id, nome: "", entradas: 0 }));
+    let entradasPrincipal = 0;
     let filtroOrigem = "todas";
     let parceirosProntos = false;
 
     function listaParceiros() {
       return ["1", "2", "3", "4", "5"].map((id) => {
         const atual = parceiros.find((p) => String(p.id) === id);
-        return { id, nome: atual && atual.nome ? String(atual.nome) : "" };
+        const entradas = atual ? Number(atual.entradas) : 0;
+        return { id, nome: atual && atual.nome ? String(atual.nome) : "", entradas: Number.isFinite(entradas) && entradas > 0 ? entradas : 0 };
       });
     }
 
@@ -179,6 +183,11 @@
       if (!id) return "Página principal";
       const nome = (listaParceiros().find((p) => p.id === id).nome || "").trim();
       return nome || ("Parceiro " + id);
+    }
+
+    function textoPessoas(total) {
+      const n = Number(total) || 0;
+      return n === 1 ? "1 pessoa" : n + " pessoas";
     }
 
     function linkParceiro(id) {
@@ -222,19 +231,27 @@
       if (res.status === 401) return;
       const dados = await lerJson(res);
       if (res.ok && Array.isArray(dados.parceiros)) parceiros = dados.parceiros;
+      if (res.ok) entradasPrincipal = Number(dados.entradas_principal) || 0;
       renderParceiros();
     }
 
     function renderParceiros() {
       const lista = listaParceiros();
-      document.getElementById("parceiros-lista").innerHTML = lista.map((p) => `
+      document.getElementById("entrada-principal").textContent = "Página principal · " + textoPessoas(entradasPrincipal);
+      document.getElementById("parceiros-lista").innerHTML = lista.map((p) => {
+        const titulo = (p.nome || "").trim() || ("Parceiro " + p.id);
+        return `
         <div class="parceiro-row">
-          <strong>Parceiro ${p.id}</strong>
+          <div>
+            <strong>${esc(titulo)}</strong>
+            <span class="entradas">${esc(textoPessoas(p.entradas))}</span>
+          </div>
           <input type="text" maxlength="60" data-parceiro-nome="${p.id}" value="${esc(p.nome)}" placeholder="Nome do parceiro" />
-          <input type="text" readonly value="${esc(linkParceiro(p.id))}" aria-label="Link do parceiro ${p.id}" />
+          <input type="text" readonly value="${esc(linkParceiro(p.id))}" aria-label="Link de ${esc(titulo)}" />
           <button type="button" class="btn--ghost" data-copiar="${p.id}">Copiar link</button>
         </div>
-      `).join("");
+      `;
+      }).join("");
       document.querySelectorAll("[data-copiar]").forEach((btn) => {
         btn.addEventListener("click", async () => {
           const id = btn.getAttribute("data-copiar");
@@ -246,7 +263,8 @@
           } catch (_) {}
           const msg = document.getElementById("parceiros-msg");
           msg.style.color = ok ? "#0d6b3c" : "#c00";
-          msg.textContent = ok ? "Link do parceiro " + id + " copiado." : "Não foi possível copiar. Selecione o link.";
+          const nome = (listaParceiros().find((p) => p.id === id) || {}).nome || "";
+          msg.textContent = ok ? "Link de " + ((nome || "").trim() || ("parceiro " + id)) + " copiado." : "Não foi possível copiar. Selecione o link.";
         });
       });
       const filtro = document.getElementById("filtro-origem");
@@ -401,6 +419,7 @@
         return;
       }
       parceiros = dados.parceiros || parceiros;
+      entradasPrincipal = Number(dados.entradas_principal) || 0;
       renderParceiros();
       render();
       msg.style.color = "#0d6b3c";

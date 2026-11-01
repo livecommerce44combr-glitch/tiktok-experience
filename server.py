@@ -33,13 +33,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 DATA_FILE = ROOT / "inscricoes.json"
 PARCEIROS_FILE = ROOT / "parceiros.json"
+ENTRADAS_FILE = ROOT / "entradas.json"
 UPLOADS = ROOT / "uploads"
 SECRET_FILE = ROOT / ".admin_secret"
 PASSWORD_FILE = ROOT / ".admin_password"
 WHATSAPP_NUMERO = "".join(ch for ch in os.environ.get("WHATSAPP_NUMERO", WHATSAPP_NUMERO) if ch.isdigit())
 EXT_BLOQUEADAS = {".py", ".json", ".secret", ".md", ".gitignore"}
-ARQUIVOS_BLOQUEADOS = {"inscricoes.json", "parceiros.json", ".admin_secret", ".admin_password", "server.py", ".gitignore"}
+ARQUIVOS_BLOQUEADOS = {"inscricoes.json", "parceiros.json", "entradas.json", ".admin_secret", ".admin_password", "server.py", ".gitignore"}
 PARCEIRO_IDS = ("1", "2", "3", "4", "5")
+PAGINAS_ENTRADA = ("principal",) + PARCEIRO_IDS
 TIPOS_OK = {".jpg", ".jpeg", ".png", ".webp", ".pdf", ".heic", ".heif"}
 MIME_EXT = {
     "image/jpeg": ".jpg",
@@ -54,6 +56,7 @@ MIME_EXT = {
     "application/pdf": ".pdf",
 }
 INSCRICOES_LOCK = threading.Lock()
+ENTRADAS_LOCK = threading.Lock()
 MAX_ARQUIVO = 5 * 1024 * 1024
 PIX_TOKEN_TTL = 30 * 60
 ID_OK = re.compile(r"^[a-z0-9-]{3,40}$")
@@ -176,8 +179,61 @@ def gravar_parceiros(nomes):
     os.replace(tmp, PARCEIROS_FILE)
 
 
-def lista_parceiros(nomes):
-    return [{"id": i, "nome": nomes[i]} for i in PARCEIRO_IDS]
+def lista_parceiros(nomes, entradas=None):
+    contagem = entradas if entradas is not None else ler_entradas()
+    return [{"id": i, "nome": nomes[i], "entradas": contagem.get(i, 0)} for i in PARCEIRO_IDS]
+
+
+def ler_entradas():
+    listas = {pagina: [] for pagina in PAGINAS_ENTRADA}
+    if ENTRADAS_FILE.exists():
+        try:
+            dados = json.loads(ENTRADAS_FILE.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            dados = None
+        if isinstance(dados, dict):
+            for pagina in PAGINAS_ENTRADA:
+                valor = dados.get(pagina, [])
+                if not isinstance(valor, list):
+                    continue
+                vistos = []
+                for item in valor:
+                    if isinstance(item, str) and re.fullmatch(r"[a-f0-9]{16}", item) and item not in vistos:
+                        vistos.append(item)
+                    if len(vistos) >= 20000:
+                        break
+                listas[pagina] = vistos
+    return listas
+
+
+def gravar_entradas(listas):
+    limpas = {}
+    for pagina in PAGINAS_ENTRADA:
+        ids = []
+        for item in listas.get(pagina, []):
+            if isinstance(item, str) and re.fullmatch(r"[a-f0-9]{16}", item) and item not in ids:
+                ids.append(item)
+            if len(ids) >= 20000:
+                break
+        limpas[pagina] = ids
+    tmp = ENTRADAS_FILE.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(limpas, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp, ENTRADAS_FILE)
+
+
+def registrar_entrada(pagina, visitante):
+    if pagina not in PAGINAS_ENTRADA or not re.fullmatch(r"[a-f0-9]{16}", visitante or ""):
+        return False
+    with ENTRADAS_LOCK:
+        listas = ler_entradas()
+        if visitante not in listas[pagina] and len(listas[pagina]) < 20000:
+            listas[pagina].append(visitante)
+            gravar_entradas(listas)
+    return True
+
+
+def contagem_entradas(listas):
+    return {pagina: len(listas.get(pagina, [])) for pagina in PAGINAS_ENTRADA}
 
 
 def novo_token():
@@ -473,7 +529,12 @@ class Handler(SimpleHTTPRequestHandler):
             if path == "/api/admin/parceiros":
                 if not self._admin_ok():
                     return self._json(401, {"ok": False, "erro": "Não autorizado"})
-                return self._json(200, {"ok": True, "parceiros": lista_parceiros(ler_parceiros())})
+                contagem = contagem_entradas(ler_entradas())
+                return self._json(200, {
+                    "ok": True,
+                    "parceiros": lista_parceiros(ler_parceiros(), contagem),
+                    "entradas_principal": contagem["principal"],
+                })
 
             if path.startswith("/api/admin/comprovante/"):
                 if not self._admin_ok():
@@ -623,7 +684,28 @@ class Handler(SimpleHTTPRequestHandler):
                     return self._json(400, {"ok": False, "erro": "Nome inválido"})
                 atual[i] = limpar_nome_parceiro(recebidos[i])
             gravar_parceiros(atual)
-            return self._json(200, {"ok": True, "parceiros": lista_parceiros(atual)})
+            contagem = contagem_entradas(ler_entradas())
+            return self._json(200, {
+                "ok": True,
+                "parceiros": lista_parceiros(atual, contagem),
+                "entradas_principal": contagem["principal"],
+            })
+
+        if path == "/api/entrada":
+            if not self._rate("entrada:" + self._ip(), 30, 60):
+                return self._json(429, {"ok": False, "erro": "Muitas tentativas"})
+            bruto = self.rfile.read(length)
+            try:
+                dados = json.loads(bruto.decode("utf-8") or "{}")
+            except json.JSONDecodeError:
+                return self._json(400, {"ok": False, "erro": "JSON inválido"})
+            if not isinstance(dados, dict):
+                return self._json(400, {"ok": False, "erro": "Entrada inválida"})
+            pagina = str(dados.get("pagina") or "")
+            visitante = str(dados.get("visitante") or "")
+            if not registrar_entrada(pagina, visitante):
+                return self._json(400, {"ok": False, "erro": "Entrada inválida"})
+            return self._json(200, {"ok": True})
 
         if path == "/api/inscricoes":
             if not self._rate("insc:" + self._ip(), 20, 60):

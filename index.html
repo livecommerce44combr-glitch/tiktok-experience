@@ -606,7 +606,7 @@
   <!--
     REVISAR ANTES DE PUBLICAR
     1) WhatsApp oficial sai só da API (não editar href no HTML)
-    2) Imagem do hero: banner-live-commerce-44.jpg
+    2) Imagem do hero: banner-tiktok-experience.jpg
     Chave e valor do Pix só saem do servidor.
   -->
 
@@ -625,8 +625,8 @@
   <main class="page" id="topo">
     <div class="poster">
       <img
-        src="/banner-live-commerce-44.jpg?v=20261017"
-        alt="TikTok Experience Caldas Novas — o mercado varejista mudou. Treinamento presencial de TikTok Shop, vendas por vídeos e lives."
+        src="/banner-tiktok-experience.jpg?v=20261101"
+        alt="TikTok Experience Caldas Novas — o mercado varejista mudou. Caldas Novas já está sentindo. Com Nara Batista, Rúbia Lage, Ana Flavia Froes e Dyessika Torres."
       />
     </div>
 
@@ -864,6 +864,43 @@
     const EVENTO_INICIO = new Date("2026-11-11T09:00:00-03:00");
     const parceiroBusca = new URLSearchParams(location.search).get("p") || "";
     const parceiroId = /^[1-5]$/.test(parceiroBusca) ? parceiroBusca : "";
+
+    function idVisitante() {
+      const chave = "tiktok-visitante";
+      try {
+        const atual = localStorage.getItem(chave) || "";
+        if (/^[a-f0-9]{16}$/.test(atual)) return atual;
+        const bytes = new Uint8Array(8);
+        if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+        else for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+        const id = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+        localStorage.setItem(chave, id);
+        return id;
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function registrarEntrada() {
+      const pagina = parceiroId || "principal";
+      const visitante = idVisitante();
+      if (!visitante) return;
+      const marca = "tiktok-entrada-" + pagina;
+      try {
+        if (sessionStorage.getItem(marca) === visitante) return;
+      } catch (_) {}
+      fetch("/api/entrada", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pagina, visitante }),
+        keepalive: true
+      }).then((res) => {
+        if (!res.ok) return;
+        try { sessionStorage.setItem(marca, visitante); } catch (_) {}
+      }).catch(() => {});
+    }
+    registrarEntrada();
     const WHATSAPP_MARLA = "5564992417978";
     const MODALIDADES = [];
 

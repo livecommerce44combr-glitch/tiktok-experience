@@ -76,6 +76,15 @@ module.exports = async (req, res) => {
       await blob.gravarParceiros(dados.nomes || {});
       return json(res, 200, { ok: true });
     }
+    if (op === "lerEntradas") {
+      const listas = await blob.lerEntradas();
+      return json(res, 200, { ok: true, entradas: blob.contagemEntradas(listas) });
+    }
+    if (op === "registrarEntrada") {
+      const dados = JSON.parse(body.toString("utf8") || "{}");
+      await blob.registrarEntrada(dados.pagina, dados.visitante);
+      return json(res, 200, { ok: true });
+    }
     if (op === "salvarArquivo") {
       const tipo = String(req.headers["content-type"] || "application/octet-stream").split(";")[0].trim();
       await blob.salvarArquivo(arquivo, body, tipo || "application/octet-stream");
