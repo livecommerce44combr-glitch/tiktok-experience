@@ -11,7 +11,7 @@
     }
   } catch (e) {}
 
-  var ATRASO_MS = 5000;
+  var ATRASO_MS = 15000;
   var HASH_FECHAR = "#grupo-modal-off";
   var modal = document.getElementById("modal-grupo-whatsapp");
   if (!modal) return;
