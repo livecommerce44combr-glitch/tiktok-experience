@@ -63,8 +63,9 @@ ID_OK = re.compile(r"^[a-z0-9-]{3,40}$")
 HEX_OK = re.compile(r"^[a-f0-9]{16}$")
 
 INGRESSOS = {
-    "primeiro-lote": {"id": "primeiro-lote", "nome": "1º lote", "valor": "R$ 49,90", "valor_numero": "49.90", "label": "1º lote — R$ 49,90"},
-    "combo-2": {"id": "combo-2", "nome": "Combo 2 ingressos", "valor": "R$ 69,90", "valor_numero": "69.90", "label": "Combo 2 ingressos — R$ 69,90"},
+    "segundo-lote": {"id": "segundo-lote", "nome": "Individual 2º lote", "valor": "R$ 59,90", "valor_numero": "59.90", "label": "Individual 2º lote — R$ 59,90"},
+    "combo-duplo": {"id": "combo-duplo", "nome": "Combo duplo 2º lote", "valor": "R$ 69,90", "valor_numero": "69.90", "label": "Combo duplo 2º lote — R$ 69,90"},
+    "combo-triplo": {"id": "combo-triplo", "nome": "Combo triplo", "valor": "R$ 79,90", "valor_numero": "79.90", "label": "Combo triplo — R$ 79,90"},
 }
 
 GET_API = {"/api/pix", "/api/ingressos", "/api/admin/inscricoes"}

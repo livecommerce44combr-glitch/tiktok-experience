@@ -298,6 +298,10 @@
       cursor: pointer;
     }
     .combo-banner button.is-on { background: #111; }
+    .combo-banner__acoes { display: grid; gap: 8px; }
+    @media (min-width: 720px) {
+      .combo-banner__acoes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
     .toggle-more {
       margin: 8px 0 22px; padding: 0; border: 0; background: none;
       color: var(--pink); font-weight: 700; cursor: pointer;
@@ -634,7 +638,7 @@
       <div class="pills">
         <span class="pill">Presencial</span>
         <span class="pill pill--hot">Vagas limitadas</span>
-        <span class="pill pill--soft">1º lote · R$ 49,90</span>
+        <span class="pill pill--soft">2º lote · R$ 59,90</span>
       </div>
 
       <p class="kicker">Inscrição</p>
@@ -663,13 +667,17 @@
         <div>📍 Palladium · Caldas Novas/GO</div>
       </div>
 
-      <aside class="combo-banner" aria-label="Combo de ingressos">
-        <span class="combo-banner__tag">Combo</span>
+      <aside class="combo-banner" aria-label="Lotes de ingressos">
+        <span class="combo-banner__tag">2º lote</span>
         <div>
-          <strong>2 ingressos por R$ 69,90</strong>
-          <p>Leve um acompanhante no 1º lote. Dois ingressos separados sairiam por R$ 99,80.</p>
+          <strong>Escolha o ingresso</strong>
+          <p>Individual R$ 59,90. Combo duplo, 2 ingressos, R$ 69,90. Combo triplo, 3 ingressos, R$ 79,90.</p>
         </div>
-        <button type="button" id="btn-combo-destaque" data-ticket="combo-2">Quero o combo</button>
+        <div class="combo-banner__acoes">
+          <button type="button" data-ticket="segundo-lote">Individual · R$ 59,90</button>
+          <button type="button" id="btn-combo-destaque" data-ticket="combo-duplo">Combo duplo · R$ 69,90</button>
+          <button type="button" data-ticket="combo-triplo">Combo triplo · R$ 79,90</button>
+        </div>
       </aside>
 
       <button class="toggle-more" type="button" id="btn-mais" aria-expanded="false">Ver mais</button>
@@ -703,24 +711,24 @@
           <h2>Ingressos</h2>
           <div class="tickets">
             <article>
-              <h3>1º lote</h3>
-              <p>Acesso completo ao TikTok Experience Caldas Novas, no valor promocional de abertura.</p>
+              <h3>Individual 2º lote</h3>
+              <p>Um ingresso completo do TikTok Experience Caldas Novas.</p>
               <div class="ticket-btns">
-                <button type="button" data-ticket="primeiro-lote"><span>Ingresso</span><strong>R$ 49,90</strong></button>
+                <button type="button" data-ticket="segundo-lote"><span>1 ingresso</span><strong>R$ 59,90</strong></button>
               </div>
             </article>
             <article>
-              <h3>Combo</h3>
-              <p>Dois ingressos do 1º lote por R$ 69,90.</p>
+              <h3>Combo duplo 2º lote</h3>
+              <p>Dois ingressos por R$ 69,90. Separados, sairiam por R$ 119,80.</p>
               <div class="ticket-btns">
-                <button type="button" data-ticket="combo-2"><span>2 ingressos</span><strong>R$ 69,90</strong></button>
+                <button type="button" data-ticket="combo-duplo"><span>2 ingressos</span><strong>R$ 69,90</strong></button>
               </div>
             </article>
             <article>
-              <h3>2º lote</h3>
-              <p>Será liberado quando o 1º lote esgotar.</p>
+              <h3>Combo triplo</h3>
+              <p>Três ingressos por R$ 79,90. Separados, sairiam por R$ 179,70.</p>
               <div class="ticket-btns">
-                <button type="button" disabled><span>Em breve</span><strong>—</strong></button>
+                <button type="button" data-ticket="combo-triplo"><span>3 ingressos</span><strong>R$ 79,90</strong></button>
               </div>
             </article>
           </div>
@@ -742,7 +750,7 @@
           </details>
           <details>
             <summary>Quanto custa o ingresso?</summary>
-            <p>O 1º lote está R$ 49,90. O combo leva 2 ingressos por R$ 69,90. O 2º lote será liberado somente quando o primeiro esgotar.</p>
+            <p>O ingresso individual do 2º lote está R$ 59,90. O combo duplo, com 2 ingressos, está R$ 69,90. O combo triplo, com 3 ingressos, está R$ 79,90.</p>
           </details>
         </div>
       </div>
@@ -1040,7 +1048,7 @@
         btn.setAttribute("aria-pressed", ativo ? "true" : "false");
       });
       const destaque = document.getElementById("btn-combo-destaque");
-      if (destaque) destaque.textContent = id === "combo-2" ? "Combo selecionado" : "Quero o combo";
+      if (destaque) destaque.setAttribute("aria-pressed", id === "combo-duplo" ? "true" : "false");
     }
     function pintarPixTravado() {
       if (!pixTravado) return;
