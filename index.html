@@ -1020,12 +1020,58 @@
         arquivo ? `Comprovante anexado nesta página: ${arquivo.name}` : "Vou enviar o comprovante nesta conversa."
       ].join("\n");
     }
+    function eventoContato() {
+      if (typeof fbq !== "function") return;
+      try { fbq("track", "Contact"); } catch (_) {}
+    }
+    function eventoLead() {
+      if (typeof fbq !== "function") return;
+      try { fbq("track", "Lead"); } catch (_) {}
+    }
+    function eventoCompraPix() {
+      if (typeof fbq !== "function") return;
+      try { fbq("track", "Purchase", { value: 0.00, currency: "USD" }); } catch (_) {}
+    }
     function abrirWhatsAppOficial(tipo) {
       const n = numeroWhatsAppDestino();
       if (!n) return false;
+      if (tipo === "cartao") eventoIngressoMeta("InitiateCheckout", pixTravado || modalidadeAtual());
       window.open(`https://wa.me/${n}?text=${encodeURIComponent(mensagemWhatsApp(tipo))}`, "_blank", "noopener,noreferrer");
       return true;
     }
+    function dadosIngressoMeta(m) {
+      const item = m || modalidadeAtual();
+      if (!item) return { currency: "BRL" };
+      const valor = Number(valorDoIngresso(item));
+      const quantidade = item.id === "combo-triplo" ? 3 : (item.id === "combo-duplo" ? 2 : 1);
+      return {
+        content_ids: [item.id],
+        content_name: item.nome || item.label || item.id,
+        content_type: "product",
+        content_category: "ingresso",
+        num_items: quantidade,
+        value: Number.isFinite(valor) ? valor : undefined,
+        currency: "BRL"
+      };
+    }
+    function eventoMeta(nome, dados, eventID) {
+      if (typeof fbq !== "function") return;
+      try {
+        if (eventID) fbq("track", nome, dados || {}, { eventID: eventID });
+        else fbq("track", nome, dados || {});
+      } catch (_) {}
+    }
+    const metaUmaVez = new Set();
+    function eventoIngressoMeta(nome, m) {
+      const item = m || modalidadeAtual();
+      if (!item) return;
+      const chave = nome + ":" + item.id;
+      if (metaUmaVez.has(chave)) return;
+      metaUmaVez.add(chave);
+      eventoMeta(nome, dadosIngressoMeta(item));
+    }
+    let metaEscolhaUsuario = false;
+
     function guardarContato(dados) {
       const n = String(dados.whatsapp || "").replace(/\D/g, "");
       const chave = String(dados.chave_pix || dados.chave || "").trim().toLowerCase();
@@ -1215,6 +1261,11 @@
         }
         pintarPixTravado();
         resumo.innerHTML = `<div><b>Nome:</b> ${d.nome || "—"}</div><div><b>WhatsApp:</b> ${d.whatsapp || "—"}</div><div><b>Ingresso:</b> ${pixTravado.nome} · ${pixTravado.valor}</div>`;
+        if (metaEscolhaUsuario) {
+          metaEscolhaUsuario = false;
+          eventoIngressoMeta("AddToCart", pixTravado);
+          eventoIngressoMeta("InitiateCheckout", pixTravado);
+        }
       } catch (_) {
         if (pedido !== pixPedido) return;
         pixChave.textContent = "Não foi possível gerar o Pix. Recarregue a página.";
@@ -1258,6 +1309,7 @@
       preencherSelects();
       selectForm.setAttribute("autocomplete", "off");
       marcarIngressoSelecionado();
+      eventoMeta("ViewContent", dadosIngressoMeta(modalidadeAtual()));
       await atualizarPix();
     }
 
@@ -1272,7 +1324,10 @@
       atualizarResumo();
     });
     form.querySelector('[name="nome"]').addEventListener("input", atualizarResumo);
-    selectForm.addEventListener("change", atualizarPix);
+    selectForm.addEventListener("change", () => {
+      metaEscolhaUsuario = true;
+      atualizarPix();
+    });
 
     comprovante.addEventListener("change", () => {
       const file = comprovante.files[0];
@@ -1292,6 +1347,7 @@
         comprovantePronto = pronto;
         rotuloComprovante("Comprovante anexado", file.name);
         msgComprovante("Comprovante pronto para envio.");
+        eventoIngressoMeta("AddPaymentInfo", pixTravado || modalidadeAtual());
       }).catch((err) => {
         if (comprovante.files[0] !== file) return;
         comprovanteErro = (err && err.message) || "Não foi possível usar esse arquivo.";
@@ -1308,9 +1364,17 @@
       if (!alvo) return;
       const href = String(alvo.getAttribute("href") || "");
       const tipo = alvo.getAttribute("data-wpp") || "";
-      if (/chat\.whatsapp\.com/i.test(href)) return;
+      if (/chat\.whatsapp\.com/i.test(href)) {
+        eventoContato();
+        return;
+      }
+      if (/google\.com\/maps|maps\.google/i.test(href)) {
+        eventoMeta("FindLocation", { content_name: "Palladium Caldas Novas" });
+        return;
+      }
       const isWpp = tipo || /wa\.me|whatsapp\.com|api\.whatsapp/i.test(href);
       if (!isWpp) return;
+      eventoContato();
       if (alvo === btnPago) return;
       e.preventDefault();
       e.stopPropagation();
@@ -1329,6 +1393,7 @@
           form.scrollIntoView({ behavior: "smooth" });
           return;
         }
+        eventoLead();
         if (preparandoComprovante) {
           msgComprovante("Aguarde, o comprovante ainda está sendo preparado.", true);
           try { await preparandoComprovante; } catch (_) {}
@@ -1344,8 +1409,14 @@
           msgComprovante("Não foi possível confirmar o Pix. Recarregue a página e tente de novo.", true);
           return;
         }
-        await salvarInscricao("pix");
+        const inscricao = await salvarInscricao("pix");
         enviou = true;
+        const ingressoPago = pixTravado || modalidadeAtual();
+        const idEvento = String((inscricao && inscricao.id) || (ingressoPago && ingressoPago.id) || "inscricao") + "-" + Date.now();
+        eventoIngressoMeta("AddToCart", ingressoPago);
+        eventoIngressoMeta("InitiateCheckout", ingressoPago);
+        eventoMeta("Purchase", dadosIngressoMeta(ingressoPago), "purchase-" + idEvento);
+        eventoMeta("CompleteRegistration", Object.assign({ status: true }, dadosIngressoMeta(ingressoPago)), "registration-" + idEvento);
       } catch (err) {
         msgComprovante((err && err.message) || "Não foi possível enviar. Tente de novo.", true);
       } finally {
@@ -1389,6 +1460,7 @@
         const id = btn.getAttribute("data-ticket");
         if (![...selectForm.options].some((opcao) => opcao.value === id)) return;
         selectForm.value = id;
+        metaEscolhaUsuario = true;
         atualizarPix();
         document.getElementById("pix").scrollIntoView({ behavior: "smooth" });
       });
@@ -1398,6 +1470,7 @@
       const btnCopiar = document.getElementById("btn-copiar-pix");
       const copia = pixLimpo(pixPayloadAtual);
       if (!copia) return;
+      eventoCompraPix();
       const ok = await copiarPix(copia);
       btnCopiar.textContent = ok ? "Copiado!" : "Toque no código e copie";
       btnCopiar.classList.toggle("is-copied", ok);
